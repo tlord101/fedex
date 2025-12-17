@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - FedEx Clone</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-functions.js"></script>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">📦 FedEx Clone</div>
+            <div class="nav-buttons">
+                <a href="../index.html" class="btn btn-outline btn-small">Back to Home</a>
+            </div>
+        </nav>
+    </header>
+
+    <main style="min-height: calc(100vh - 200px); display: flex; align-items: center; padding: 2rem 0;">
+        <div class="container" style="max-width: 400px;">
+            <div class="card">
+                <h2 style="text-align: center; margin-bottom: 2rem;">Login to Your Account</h2>
+
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <label style="margin: 0;">
+                            <input type="checkbox" name="remember"> Remember me
+                        </label>
+                        <a href="forgot-password.html" style="font-size: 0.9rem;">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">Sign In</button>
+                </form>
+
+                <div style="position: relative; margin: 1.5rem 0; text-align: center;">
+                    <span style="background-color: white; padding: 0 0.5rem; position: relative; z-index: 1; color: var(--text-light);">OR</span>
+                    <div style="position: absolute; top: 50%; left: 0; right: 0; border-top: 1px solid var(--border-color); z-index: 0;"></div>
+                </div>
+
+                <button type="button" class="btn btn-outline" id="google-login" style="width: 100%; margin-bottom: 1rem;">
+                    Sign in with Google
+                </button>
+
+                <div style="text-align: center; color: var(--text-light);">
+                    <p>Don't have an account? <a href="signup.html" style="color: var(--primary-color); font-weight: 600;">Sign up here</a></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer style="background-color: #1a1a1a; color: white; padding: 2rem 0; text-align: center; margin-top: auto;">
+        <p>&copy; 2024 FedEx Clone. All rights reserved.</p>
+    </footer>
+
+    <!-- Configuration & Services -->
+    <script src="../config/firebase.js"></script>
+    <script src="../config/constants.js"></script>
+    <script src="../services/authService.js"></script>
+    <script src="../services/uiService.js"></script>
+
+    <script>
+        // Check if already logged in
+        authService.subscribe((event, user) => {
+            if (event === 'auth-change' && user) {
+                window.location.href = 'dashboard.html';
+            }
+        });
+
+        // Form submission
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            uiService.showLoading('Signing in...');
+            const result = await authService.signIn(email, password);
+            uiService.hideLoading();
+
+            if (result.success) {
+                uiService.showToast('Login successful! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+            } else {
+                uiService.showToast('Login failed: ' + result.error, 'error');
+            }
+        });
+
+        // Google login
+        document.getElementById('google-login').addEventListener('click', async () => {
+            uiService.showLoading('Signing in with Google...');
+            const result = await authService.signInWithGoogle();
+            uiService.hideLoading();
+
+            if (result.success) {
+                uiService.showToast('Login successful! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+            } else {
+                uiService.showToast('Google login failed: ' + result.error, 'error');
+            }
+        });
+    </script>
+</body>
+</html>

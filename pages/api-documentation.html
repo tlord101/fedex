@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation - FedEx Clone</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <style>
+        .api-nav {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .api-sidebar {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .api-sidebar h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 18px;
+        }
+
+        .api-sidebar .menu-item {
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.3s;
+            margin-bottom: 5px;
+        }
+
+        .api-sidebar .menu-item:hover {
+            background: #f0f0f0;
+        }
+
+        .api-sidebar .menu-item.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .api-content {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .api-section {
+            display: none;
+        }
+
+        .api-section.active {
+            display: block;
+        }
+
+        .endpoint-card {
+            background: #f8f9fa;
+            border-left: 4px solid var(--primary-color);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .endpoint-method {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+
+        .method-get {
+            background: #e7f3ff;
+            color: #0066cc;
+        }
+
+        .method-post {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .method-put {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .method-delete {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .endpoint-path {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+
+        .endpoint-description {
+            color: #666;
+            margin: 10px 0;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .code-block.json {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .parameter-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+        }
+
+        .parameter-table th {
+            background: #f0f0f0;
+            padding: 10px;
+            text-align: left;
+            font-weight: bold;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .parameter-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .required {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .tab-nav {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 20px;
+        }
+
+        .tab-nav button {
+            background: none;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-nav button.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .webhook-event {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+
+        .api-key-section {
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .api-key-display {
+            background: white;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin-top: 10px;
+            overflow-x: auto;
+            word-break: break-all;
+        }
+
+        @media (max-width: 768px) {
+            .api-nav {
+                grid-template-columns: 1fr;
+            }
+
+            .api-sidebar {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1>FedEx API</h1>
+            <div>
+                <a href="../index.html" class="btn-link">Home</a>
+                <a href="../pages/dashboard.html" class="btn-link">Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>REST API Documentation</h2>
+
+        <div class="api-nav">
+            <!-- Sidebar Navigation -->
+            <div class="api-sidebar">
+                <h3>Documentation</h3>
+                <div class="menu-item active" onclick="switchSection('overview')">Overview</div>
+                <div class="menu-item" onclick="switchSection('authentication')">Authentication</div>
+                <div class="menu-item" onclick="switchSection('shipments')">Shipments</div>
+                <div class="menu-item" onclick="switchSection('tracking')">Tracking</div>
+                <div class="menu-item" onclick="switchSection('drivers')">Drivers</div>
+                <div class="menu-item" onclick="switchSection('payments')">Payments</div>
+                <div class="menu-item" onclick="switchSection('admin')">Admin</div>
+                <div class="menu-item" onclick="switchSection('international')">International</div>
+                <div class="menu-item" onclick="switchSection('webhooks')">Webhooks</div>
+                <div class="menu-item" onclick="switchSection('batch')">Batch Operations</div>
+                <div class="menu-item" onclick="switchSection('apikeys')">API Keys</div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="api-content">
+                <!-- Overview Section -->
+                <div id="overview" class="api-section active">
+                    <h3>API Overview</h3>
+                    <div class="endpoint-card">
+                        <p><strong>Base URL:</strong> <code>https://api.fedexclone.com/api</code></p>
+                        <p><strong>Version:</strong> 1.0.0</p>
+                        <p><strong>Format:</strong> JSON</p>
+                    </div>
+
+                    <h4>Rate Limits</h4>
+                    <div class="endpoint-card">
+                        <p>1,000 requests per hour per API key</p>
+                        <p>Excess requests will receive a 429 (Too Many Requests) response</p>
+                    </div>
+
+                    <h4>HTTP Status Codes</h4>
+                    <table class="parameter-table">
+                        <tr>
+                            <th>Code</th>
+                            <th>Meaning</th>
+                        </tr>
+                        <tr>
+                            <td>200</td>
+                            <td>Success</td>
+                        </tr>
+                        <tr>
+                            <td>201</td>
+                            <td>Created</td>
+                        </tr>
+                        <tr>
+                            <td>400</td>
+                            <td>Bad Request</td>
+                        </tr>
+                        <tr>
+                            <td>401</td>
+                            <td>Unauthorized</td>
+                        </tr>
+                        <tr>
+                            <td>404</td>
+                            <td>Not Found</td>
+                        </tr>
+                        <tr>
+                            <td>429</td>
+                            <td>Too Many Requests</td>
+                        </tr>
+                        <tr>
+                            <td>500</td>
+                            <td>Internal Server Error</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Authentication Section -->
+                <div id="authentication" class="api-section">
+                    <h3>Authentication</h3>
+                    <p>All API requests require a bearer token in the Authorization header.</p>
+
+                    <div class="endpoint-card">
+                        <strong>Request Header:</strong>
+                        <div class="code-block">
+Authorization: Bearer YOUR_API_KEY
+                        </div>
+                    </div>
+
+                    <p>Get your API key from your dashboard under "API Settings".</p>
+                </div>
+
+                <!-- Shipments Section -->
+                <div id="shipments" class="api-section">
+                    <h3>Shipments</h3>
+
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-post">POST</span>
+                        <span class="endpoint-path">/shipments</span>
+                        <p class="endpoint-description">Create a new shipment</p>
+
+                        <strong>Request Body:</strong>
+                        <div class="code-block json">
+{
+  "senderName": "John Doe",
+  "senderEmail": "john@example.com",
+  "senderPhone": "+1234567890",
+  "originCity": "New York",
+  "originState": "NY",
+  "destCity": "Los Angeles",
+  "destState": "CA",
+  "recipientName": "Jane Smith",
+  "recipientEmail": "jane@example.com",
+  "recipientPhone": "+0987654321",
+  "weight": 2.5,
+  "dimensions": "10x10x10",
+  "shippingType": "EXPRESS",
+  "itemDescription": "Electronics"
+}
+                        </div>
+                    </div>
+
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-get">GET</span>
+                        <span class="endpoint-path">/shipments/:id</span>
+                        <p class="endpoint-description">Get shipment details</p>
+                    </div>
+
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-get">GET</span>
+                        <span class="endpoint-path">/shipments</span>
+                        <p class="endpoint-description">List shipments with filtering</p>
+                        <strong>Query Parameters:</strong>
+                        <table class="parameter-table">
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                            <tr>
+                                <td>status</td>
+                                <td>string</td>
+                                <td>Filter by status (PENDING, IN_TRANSIT, DELIVERED)</td>
+                            </tr>
+                            <tr>
+                                <td>shippingType</td>
+                                <td>string</td>
+                                <td>Filter by type (STANDARD, EXPRESS, OVERNIGHT)</td>
+                            </tr>
+                            <tr>
+                                <td>limit</td>
+                                <td>integer</td>
+                                <td>Results per page (default: 50, max: 100)</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tracking Section -->
+                <div id="tracking" class="api-section">
+                    <h3>Tracking</h3>
+
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-get">GET</span>
+                        <span class="endpoint-path">/tracking/:trackingNumber</span>
+                        <p class="endpoint-description">Get current tracking status</p>
+                    </div>
+
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-get">GET</span>
+                        <span class="endpoint-path">/tracking/:trackingNumber/events</span>
+                        <p class="endpoint-description">Get all tracking events</p>
+
+                        <strong>Response Example:</strong>
+                        <div class="code-block json">
+{
+  "trackingNumber": "FEX123456789",
+  "status": "IN_TRANSIT",
+  "events": [
+    {
+      "status": "PICKED_UP",
+      "timestamp": "2024-01-01T10:00:00Z",
+      "location": "New York, NY"
+    },
+    {
+      "status": "IN_TRANSIT",
+      "timestamp": "2024-01-01T14:00:00Z",
+      "location": "Philadelphia, PA"
+    }
+  ]
+}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Drivers Section -->
+                <div id="drivers" class="api-section">
+                    <h3>Drivers</h3>
+
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-get">GET</span>
+                        <span class="endpoint-path">/drivers</span>
+                        <p class="endpoint-description">Get list of available drivers</p>
+                    </div>
+
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-put">PUT</span>
+                        <span class="endpoint-path">/drivers/:id/location</span>
+                        <p class="endpoint-description">Update driver location (real-time tracking)</p>
+
+                        <strong>Request Body:</strong>
+                        <div class="code-block json">
+{
+  "latitude": 40.7128,
+  "longitude": -74.0060
+}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payments Section -->
+                <div id="payments" class="api-section">
+                    <h3>Payments</h3>
+
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-post">POST</span>
+                        <span class="endpoint-path">/payments</span>
+                        <p class="endpoint-description">Create a payment</p>
+
+                        <strong>Request Body:</strong>
+                        <div class="code-block json">
+{
+  "shipmentId": "ship_123",
+  "amount": 99.99,
+  "currency": "USD",
+  "paymentMethod": "card",
+  "cardToken": "tok_visa"
+}
+                        </div>
+                    </div>
+
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-get">GET</span>
+                        <span class="endpoint-path">/invoices/:id</span>
+                        <p class="endpoint-description">Get invoice PDF/details</p>
+                    </div>
+                </div>
+
+                <!-- Admin Section -->
+                <div id="admin" class="api-section">
+                    <h3>Admin Endpoints</h3>
+
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-get">GET</span>
+                        <span class="endpoint-path">/admin/stats</span>
+                        <p class="endpoint-description">Get system statistics</p>
+                        <p><strong>Requires:</strong> <span class="required">Admin Role</span></p>
+                    </div>
+
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-get">GET</span>
+                        <span class="endpoint-path">/admin/users</span>
+                        <p class="endpoint-description">List all users</p>
+                        <p><strong>Requires:</strong> <span class="required">Admin Role</span></p>
+                    </div>
+
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-put">PUT</span>
+                        <span class="endpoint-path">/admin/drivers/:id/verify</span>
+                        <p class="endpoint-description">Verify/approve a driver</p>
+                        <p><strong>Requires:</strong> <span class="required">Admin Role</span></p>
+                    </div>
+                </div>
+
+                <!-- International Section -->
+                <div id="international" class="api-section">
+                    <h3>International Shipping</h3>
+
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-get">GET</span>
+                        <span class="endpoint-path">/international/countries</span>
+                        <p class="endpoint-description">Get list of supported countries</p>
+                    </div>
+
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-post">POST</span>
+                        <span class="endpoint-path">/international/customs</span>
+                        <p class="endpoint-description">Generate customs form</p>
+
+                        <strong>Request Body:</strong>
+                        <div class="code-block json">
+{
+  "shipmentId": "ship_123",
+  "formType": "CN23",
+  "purpose": "sale"
+}
+                        </div>
+                    </div>
+
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-get">GET</span>
+                        <span class="endpoint-path">/international/exchange-rates</span>
+                        <p class="endpoint-description">Get current exchange rates</p>
+                    </div>
+                </div>
+
+                <!-- Webhooks Section -->
+                <div id="webhooks" class="api-section">
+                    <h3>Webhooks</h3>
+                    <p>Webhooks allow you to receive real-time notifications for important events.</p>
+
+                    <h4>Supported Events:</h4>
+                    <div class="webhook-event">
+                        <strong>shipment.created</strong><br>
+                        <small>Triggered when a new shipment is created</small>
+                    </div>
+                    <div class="webhook-event">
+                        <strong>shipment.picked_up</strong><br>
+                        <small>Triggered when shipment is picked up</small>
+                    </div>
+                    <div class="webhook-event">
+                        <strong>shipment.in_transit</strong><br>
+                        <small>Triggered when shipment is in transit</small>
+                    </div>
+                    <div class="webhook-event">
+                        <strong>shipment.delivered</strong><br>
+                        <small>Triggered when shipment is delivered</small>
+                    </div>
+                    <div class="webhook-event">
+                        <strong>delivery.completed</strong><br>
+                        <small>Triggered when driver completes delivery</small>
+                    </div>
+                    <div class="webhook-event">
+                        <strong>payment.received</strong><br>
+                        <small>Triggered when payment is received</small>
+                    </div>
+
+                    <h4>Webhook Payload Example:</h4>
+                    <div class="code-block json">
+{
+  "event": "shipment.delivered",
+  "timestamp": "2024-01-01T12:00:00Z",
+  "data": {
+    "shipmentId": "ship_123",
+    "trackingNumber": "FEX123456789",
+    "status": "DELIVERED",
+    "deliveredAt": "2024-01-01T12:00:00Z"
+  }
+}
+                    </div>
+
+                    <p><strong>Retry Policy:</strong> Failed webhooks are retried up to 5 times with exponential backoff.</p>
+                </div>
+
+                <!-- Batch Operations -->
+                <div id="batch" class="api-section">
+                    <h3>Batch Operations</h3>
+
+                    <div class="endpoint-card">
+                        <span class="endpoint-method method-post">POST</span>
+                        <span class="endpoint-path">/batch/shipments</span>
+                        <p class="endpoint-description">Create multiple shipments in one request</p>
+
+                        <strong>Request Body:</strong>
+                        <div class="code-block json">
+{
+  "shipments": [
+    {
+      "senderName": "John Doe",
+      "destCity": "Los Angeles",
+      ...
+    },
+    {
+      "senderName": "Jane Smith",
+      "destCity": "Chicago",
+      ...
+    }
+  ]
+}
+                        </div>
+
+                        <strong>Response:</strong>
+                        <div class="code-block json">
+{
+  "success": true,
+  "created": 2,
+  "results": [
+    {"id": "ship_123", "trackingNumber": "FEX123456789"},
+    {"id": "ship_124", "trackingNumber": "FEX123456790"}
+  ]
+}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API Keys -->
+                <div id="apikeys" class="api-section">
+                    <h3>API Keys Management</h3>
+
+                    <div class="api-key-section">
+                        <h4>Your API Keys</h4>
+                        <button onclick="loadAPIKeys()" class="btn">Load My Keys</button>
+                        <button onclick="showCreateKeyModal()" class="btn" style="background: #28a745;">Create New Key</button>
+                        
+                        <div id="apiKeysList" style="margin-top: 20px;"></div>
+                    </div>
+
+                    <div class="endpoint-card">
+                        <strong>Create API Key:</strong>
+                        <div class="code-block json">
+{
+  "name": "Production Key",
+  "permissions": [
+    "read:shipments",
+    "create:shipments",
+    "read:tracking",
+    "create:payments"
+  ]
+}
+                        </div>
+                    </div>
+
+                    <p><strong>Important:</strong> Keep your API keys secure. Never commit them to version control.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../config/firebase.js"></script>
+    <script src="../config/constants.js"></script>
+    <script src="../services/authService.js"></script>
+    <script src="../services/apiService.js"></script>
+    <script src="../services/uiService.js"></script>
+
+    <script>
+        // Switch sections
+        function switchSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.api-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Load API keys
+        async function loadAPIKeys() {
+            const user = window.firebaseAuth.currentUser;
+            if (!user) return;
+
+            const keys = await apiService.getAPIKeys(user.uid);
+            const list = document.getElementById('apiKeysList');
+            
+            if (keys.length === 0) {
+                list.innerHTML = '<p>No API keys yet. Create one to get started.</p>';
+                return;
+            }
+
+            let html = '<div style="margin-top: 20px;">';
+            keys.forEach(key => {
+                html += `
+                    <div style="background: white; border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 4px;">
+                        <strong>${key.name}</strong><br>
+                        <code style="background: #f5f5f5; padding: 10px; display: block; margin-top: 10px;">${key.key.substring(0, 10)}...${key.key.substring(key.key.length - 10)}</code>
+                        <small style="color: #999;">Created: ${new Date(key.createdAt).toLocaleDateString()}</small>
+                        <button onclick="revokeKey('${key.id}')" style="float: right; background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Revoke</button>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            list.innerHTML = html;
+        }
+
+        // Show create key modal
+        function showCreateKeyModal() {
+            const keyName = prompt('Enter API key name:');
+            if (keyName) {
+                createKey(keyName);
+            }
+        }
+
+        // Create API key
+        async function createKey(keyName) {
+            const user = window.firebaseAuth.currentUser;
+            if (!user) return;
+
+            const result = await apiService.createAPIKey(user.uid, keyName);
+            if (result.success) {
+                alert('API Key created:\n\n' + result.apiKey + '\n\nSave this somewhere safe - you won\'t be able to see it again!');
+                loadAPIKeys();
+            }
+        }
+
+        // Revoke API key
+        async function revokeKey(keyId) {
+            if (confirm('Revoke this API key? This action cannot be undone.')) {
+                const result = await apiService.revokeAPIKey(keyId);
+                if (result.success) {
+                    uiService.showToast('API key revoked');
+                    loadAPIKeys();
+                }
+            }
+        }
+
+        // Check auth
+        authService.subscribe((user) => {
+            if (!user) {
+                // Show API docs without auth
+            }
+        });
+    </script>
+</body>
+</html>

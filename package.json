@@ -1,0 +1,40 @@
+{
+  "name": "fedex-clone",
+  "version": "0.5.0",
+  "description": "A full-featured shipping and logistics platform built with Firebase",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p 8000 -c-1",
+    "serve": "npx http-server",
+    "deploy:firebase": "firebase deploy",
+    "deploy:netlify": "netlify deploy --prod",
+    "test": "echo \"Add tests here\"",
+    "lint": "echo \"Add linting here\""
+  },
+  "keywords": [
+    "shipping",
+    "logistics",
+    "firebase",
+    "fedex",
+    "tracking",
+    "e-commerce"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/fedex-clone"
+  },
+  "devDependencies": {
+    "firebase-tools": "^12.0.0",
+    "netlify-cli": "^16.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

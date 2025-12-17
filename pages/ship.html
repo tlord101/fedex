@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Shipment - FedEx Clone</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-functions.js"></script>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">📦 FedEx Clone</div>
+            <div class="nav-buttons">
+                <a href="../index.html" class="btn btn-outline btn-small">Back to Home</a>
+                <a href="dashboard.html" class="btn btn-primary btn-small">Dashboard</a>
+            </div>
+        </nav>
+    </header>
+
+    <main style="padding: 2rem 0; min-height: calc(100vh - 200px);">
+        <div class="container">
+            <h1 style="margin-bottom: 2rem;">Create a New Shipment</h1>
+
+            <div class="grid grid-2">
+                <!-- Shipment Form -->
+                <div>
+                    <div class="card">
+                        <h2 style="margin-bottom: 1.5rem;">Shipment Details</h2>
+                        <form id="shipment-form">
+                            <!-- Sender Information -->
+                            <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">Sender Information</h3>
+                            
+                            <div class="form-group">
+                                <label for="sender-name">Full Name</label>
+                                <input type="text" id="sender-name" name="sender-name" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="sender-phone">Phone Number</label>
+                                <input type="tel" id="sender-phone" name="sender-phone" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="sender-email">Email</label>
+                                <input type="email" id="sender-email" name="sender-email" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="sender-address">Address</label>
+                                <input type="text" id="sender-address" name="sender-address" required>
+                            </div>
+
+                            <div class="grid grid-2">
+                                <div class="form-group">
+                                    <label for="sender-city">City</label>
+                                    <input type="text" id="sender-city" name="sender-city" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="sender-state">State</label>
+                                    <input type="text" id="sender-state" name="sender-state" required>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-2">
+                                <div class="form-group">
+                                    <label for="sender-zip">ZIP Code</label>
+                                    <input type="text" id="sender-zip" name="sender-zip" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="sender-country">Country</label>
+                                    <input type="text" id="sender-country" name="sender-country" required>
+                                </div>
+                            </div>
+
+                            <!-- Recipient Information -->
+                            <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">Recipient Information</h3>
+                            
+                            <div class="form-group">
+                                <label for="recipient-name">Full Name</label>
+                                <input type="text" id="recipient-name" name="recipient-name" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="recipient-phone">Phone Number</label>
+                                <input type="tel" id="recipient-phone" name="recipient-phone" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="recipient-email">Email</label>
+                                <input type="email" id="recipient-email" name="recipient-email" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="recipient-address">Address</label>
+                                <input type="text" id="recipient-address" name="recipient-address" required>
+                            </div>
+
+                            <div class="grid grid-2">
+                                <div class="form-group">
+                                    <label for="recipient-city">City</label>
+                                    <input type="text" id="recipient-city" name="recipient-city" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="recipient-state">State</label>
+                                    <input type="text" id="recipient-state" name="recipient-state" required>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-2">
+                                <div class="form-group">
+                                    <label for="recipient-zip">ZIP Code</label>
+                                    <input type="text" id="recipient-zip" name="recipient-zip" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="recipient-country">Country</label>
+                                    <input type="text" id="recipient-country" name="recipient-country" required>
+                                </div>
+                            </div>
+
+                            <!-- Package Information -->
+                            <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">Package Information</h3>
+                            
+                            <div class="form-group">
+                                <label for="package-description">Description</label>
+                                <textarea id="package-description" name="package-description" placeholder="What are you shipping?" required></textarea>
+                            </div>
+
+                            <div class="grid grid-2">
+                                <div class="form-group">
+                                    <label for="package-weight">Weight (lbs)</label>
+                                    <input type="number" id="package-weight" name="package-weight" min="0.1" step="0.1" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="package-value">Declared Value ($)</label>
+                                    <input type="number" id="package-value" name="package-value" min="0" step="0.01">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-3">
+                                <div class="form-group">
+                                    <label for="package-length">Length (in)</label>
+                                    <input type="number" id="package-length" name="package-length" min="0" step="0.1">
+                                </div>
+                                <div class="form-group">
+                                    <label for="package-width">Width (in)</label>
+                                    <input type="number" id="package-width" name="package-width" min="0" step="0.1">
+                                </div>
+                                <div class="form-group">
+                                    <label for="package-height">Height (in)</label>
+                                    <input type="number" id="package-height" name="package-height" min="0" step="0.1">
+                                </div>
+                            </div>
+
+                            <!-- Shipping Options -->
+                            <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">Shipping Options</h3>
+                            
+                            <div class="form-group">
+                                <label for="shipping-type">Shipping Type</label>
+                                <select id="shipping-type" name="shipping-type" required>
+                                    <option value="">Select shipping type</option>
+                                    <option value="standard">Standard (5 days)</option>
+                                    <option value="express">Express (3 days)</option>
+                                    <option value="overnight">Overnight</option>
+                                    <option value="international">International</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="signature-required" name="signature-required">
+                                    Signature Required (+$5.00)
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="insurance" name="insurance">
+                                    Add Insurance
+                                </label>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;">Calculate & Review</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Summary -->
+                <div>
+                    <div class="card" id="summary-card" style="position: sticky; top: 80px;">
+                        <h2 style="margin-bottom: 1.5rem;">Order Summary</h2>
+                        <div id="summary-content">
+                            <p style="color: var(--text-light); text-align: center;">Fill in the form to see the summary</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer style="background-color: #1a1a1a; color: white; padding: 2rem 0; margin-top: 4rem;">
+        <div class="container">
+            <p style="text-align: center;">&copy; 2024 FedEx Clone. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Configuration & Services -->
+    <script src="../config/firebase.js"></script>
+    <script src="../config/constants.js"></script>
+    <script src="../services/authService.js"></script>
+    <script src="../services/shipmentService.js"></script>
+    <script src="../services/rateService.js"></script>
+    <script src="../services/uiService.js"></script>
+
+    <script>
+        // Check if user is authenticated
+        if (!authService.isAuthenticated()) {
+            // Allow guests to create shipments
+        }
+
+        // Update summary on form change
+        const form = document.getElementById('shipment-form');
+        const summaryContent = document.getElementById('summary-content');
+
+        form.addEventListener('change', updateSummary);
+        form.addEventListener('input', updateSummary);
+
+        function updateSummary() {
+            const senderCity = document.getElementById('sender-city').value;
+            const recipientCity = document.getElementById('recipient-city').value;
+            const weight = parseFloat(document.getElementById('package-weight').value) || 0;
+            const shippingType = document.getElementById('shipping-type').value;
+            const signatureRequired = document.getElementById('signature-required').checked;
+            const insurance = document.getElementById('insurance').checked;
+
+            if (!shippingType || !weight) {
+                summaryContent.innerHTML = '<p style="color: var(--text-light); text-align: center;">Fill in required fields to see pricing</p>';
+                return;
+            }
+
+            const rateInfo = rateService.calculateRate(shippingType, weight, null, false);
+            let totalCost = rateInfo.totalCost;
+
+            if (signatureRequired) totalCost += 5.00;
+            if (insurance) totalCost += weight * 0.50;
+
+            const html = `
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color);">
+                    <h4>Route</h4>
+                    <p><strong>From:</strong> ${senderCity || 'Not specified'}</p>
+                    <p><strong>To:</strong> ${recipientCity || 'Not specified'}</p>
+                </div>
+
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color);">
+                    <h4>Package</h4>
+                    <p><strong>Weight:</strong> ${weight} lbs</p>
+                    <p><strong>Type:</strong> ${rateService.formatShippingType(shippingType)}</p>
+                </div>
+
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color);">
+                    <h4>Pricing Breakdown</h4>
+                    <div style="font-size: 0.95rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Base Rate</span>
+                            <span>${uiService.formatCurrency(rateInfo.baseRate)}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Weight Charge</span>
+                            <span>${uiService.formatCurrency(rateInfo.weightCharge)}</span>
+                        </div>
+                        ${signatureRequired ? `<div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Signature Required</span>
+                            <span>${uiService.formatCurrency(5.00)}</span>
+                        </div>` : ''}
+                        ${insurance ? `<div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Insurance</span>
+                            <span>${uiService.formatCurrency(weight * 0.50)}</span>
+                        </div>` : ''}
+                    </div>
+                </div>
+
+                <div style="background-color: var(--light-bg); padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 1.1rem; font-weight: 600;">Total Cost</span>
+                        <span style="font-size: 1.5rem; color: var(--primary-color); font-weight: bold;">${uiService.formatCurrency(totalCost)}</span>
+                    </div>
+                </div>
+
+                <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 1rem;">
+                    <strong>Estimated Delivery:</strong> ${uiService.formatDate(rateInfo.estimatedDelivery, 'short')}
+                </p>
+            `;
+
+            summaryContent.innerHTML = html;
+        }
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const shipmentData = {
+                senderId: authService.currentUser?.uid || 'guest',
+                senderName: document.getElementById('sender-name').value,
+                senderAddress: {
+                    street: document.getElementById('sender-address').value,
+                    city: document.getElementById('sender-city').value,
+                    state: document.getElementById('sender-state').value,
+                    zip: document.getElementById('sender-zip').value,
+                    country: document.getElementById('sender-country').value
+                },
+                senderPhone: document.getElementById('sender-phone').value,
+                senderEmail: document.getElementById('sender-email').value,
+                recipientName: document.getElementById('recipient-name').value,
+                recipientAddress: {
+                    street: document.getElementById('recipient-address').value,
+                    city: document.getElementById('recipient-city').value,
+                    state: document.getElementById('recipient-state').value,
+                    zip: document.getElementById('recipient-zip').value,
+                    country: document.getElementById('recipient-country').value
+                },
+                recipientPhone: document.getElementById('recipient-phone').value,
+                recipientEmail: document.getElementById('recipient-email').value,
+                packageDescription: document.getElementById('package-description').value,
+                weight: parseFloat(document.getElementById('package-weight').value),
+                dimensions: {
+                    length: parseFloat(document.getElementById('package-length').value) || null,
+                    width: parseFloat(document.getElementById('package-width').value) || null,
+                    height: parseFloat(document.getElementById('package-height').value) || null
+                },
+                declaredValue: parseFloat(document.getElementById('package-value').value) || 0,
+                shippingType: document.getElementById('shipping-type').value,
+                signatureRequired: document.getElementById('signature-required').checked,
+                insurance: document.getElementById('insurance').checked,
+                totalCost: parseFloat(document.getElementById('summary-content').querySelector('[style*="color: var(--primary-color)"]')?.textContent.replace(/[^0-9.]/g, '')) || 0
+            };
+
+            uiService.showLoading('Creating shipment...');
+            const result = await shipmentService.createShipment(shipmentData);
+            uiService.hideLoading();
+
+            if (result.success) {
+                uiService.showToast('Shipment created successfully!', 'success');
+                setTimeout(() => {
+                    window.location.href = `tracking.html?id=${result.shipmentId}`;
+                }, 1500);
+            } else {
+                uiService.showToast('Failed to create shipment: ' + result.error, 'error');
+            }
+        });
+
+        // Pre-fill user data if logged in
+        if (authService.currentUser) {
+            const user = authService.currentUser;
+            document.getElementById('sender-name').value = user.displayName || '';
+            document.getElementById('sender-email').value = user.email || '';
+            document.getElementById('sender-phone').value = user.phone || '';
+            if (user.address) {
+                document.getElementById('sender-address').value = user.address.street || '';
+                document.getElementById('sender-city').value = user.address.city || '';
+                document.getElementById('sender-state').value = user.address.state || '';
+                document.getElementById('sender-zip').value = user.address.zip || '';
+                document.getElementById('sender-country').value = user.address.country || '';
+            }
+        }
+    </script>
+</body>
+</html>

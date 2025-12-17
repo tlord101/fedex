@@ -1,0 +1,27 @@
+# Git ignore file
+node_modules/
+.env
+.env.local
+.env.*.local
+*.log
+.DS_Store
+dist/
+build/
+.firebase/
+.firebaserc
+.git/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+coverage/
+test-results/
+
+# OS
+Thumbs.db
+.DS_Store

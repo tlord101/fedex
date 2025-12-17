@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Shipment - FedEx Clone</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-functions.js"></script>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">📦 FedEx Clone</div>
+            <div class="nav-buttons">
+                <a href="../index.html" class="btn btn-outline btn-small">Back to Home</a>
+                <a href="dashboard.html" class="btn btn-primary btn-small">Dashboard</a>
+            </div>
+        </nav>
+    </header>
+
+    <main style="padding: 2rem 0; min-height: calc(100vh - 200px);">
+        <div class="container">
+            <div id="tracking-content" style="display: none;">
+                <!-- Shipment Header -->
+                <div class="card" style="margin-bottom: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div>
+                            <h1 style="margin-bottom: 0.5rem;" id="shipment-tracking">FDX000000000000</h1>
+                            <p style="color: var(--text-light); margin: 0;">Tracking Number</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="tracking-status" id="shipment-status" style="margin-bottom: 1rem;">Pending</div>
+                            <p style="color: var(--text-light); margin: 0;">Last updated: <span id="shipment-updated">Just now</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-2" style="margin-bottom: 2rem;">
+                    <!-- Shipment Details -->
+                    <div class="card">
+                        <h2 style="margin-bottom: 1.5rem;">Shipment Details</h2>
+                        
+                        <h4 style="margin-top: 1rem;">From</h4>
+                        <p style="margin-bottom: 1rem;">
+                            <strong id="sender-name">John Doe</strong><br>
+                            <span id="sender-address">123 Main St</span><br>
+                            <span id="sender-city">New York</span>, <span id="sender-state">NY</span> <span id="sender-zip">10001</span>
+                        </p>
+
+                        <h4>To</h4>
+                        <p style="margin-bottom: 1rem;">
+                            <strong id="recipient-name">Jane Smith</strong><br>
+                            <span id="recipient-address">456 Oak Ave</span><br>
+                            <span id="recipient-city">Los Angeles</span>, <span id="recipient-state">CA</span> <span id="recipient-zip">90001</span>
+                        </p>
+
+                        <h4>Package</h4>
+                        <p>
+                            <strong>Description:</strong> <span id="package-description">Electronics</span><br>
+                            <strong>Weight:</strong> <span id="package-weight">2.5</span> lbs<br>
+                            <strong>Declared Value:</strong> <span id="package-value">$150.00</span>
+                        </p>
+                    </div>
+
+                    <!-- Key Info -->
+                    <div>
+                        <div class="card" style="margin-bottom: 1rem;">
+                            <h4>Shipping Type</h4>
+                            <p style="font-size: 1.2rem; color: var(--primary-color); margin: 0;">
+                                <span id="shipping-type">Standard</span>
+                            </p>
+                        </div>
+
+                        <div class="card" style="margin-bottom: 1rem;">
+                            <h4>Service</h4>
+                            <p style="margin: 0;">
+                                <span id="service-info">Standard Delivery</span>
+                            </p>
+                        </div>
+
+                        <div class="card" style="margin-bottom: 1rem;">
+                            <h4>Total Cost</h4>
+                            <p style="font-size: 1.3rem; color: var(--primary-color); font-weight: 600; margin: 0;">
+                                <span id="total-cost">$5.99</span>
+                            </p>
+                        </div>
+
+                        <div class="card">
+                            <h4>Estimated Delivery</h4>
+                            <p style="font-size: 1.1rem; font-weight: 600; margin: 0;">
+                                <span id="estimated-delivery">Dec 28, 2024</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline -->
+                <div class="card">
+                    <h2 style="margin-bottom: 1.5rem;">Tracking Timeline</h2>
+                    <div class="timeline" id="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-date">Dec 26, 2024 - 2:00 PM</div>
+                            <div class="timeline-title">Order Placed</div>
+                            <div class="timeline-location">New York, NY</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div style="margin-top: 2rem;">
+                    <button onclick="window.print()" class="btn btn-outline btn-small" style="margin-right: 1rem;">Print</button>
+                    <button onclick="copyTrackingNumber()" class="btn btn-outline btn-small" style="margin-right: 1rem;">Copy Tracking #</button>
+                    <button onclick="shareTracking()" class="btn btn-outline btn-small">Share</button>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loading-state" style="text-align: center; padding: 3rem;">
+                <p style="color: var(--text-light); margin-bottom: 1.5rem;">Loading tracking information...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="error-state" style="text-align: center; padding: 3rem; display: none;">
+                <h2 style="color: var(--danger-color); margin-bottom: 1rem;">Shipment Not Found</h2>
+                <p style="color: var(--text-light); margin-bottom: 1.5rem;">The tracking number you're looking for could not be found.</p>
+                <div>
+                    <a href="../index.html" class="btn btn-primary" style="margin-right: 1rem;">Back to Home</a>
+                    <a href="ship.html" class="btn btn-outline">Create New Shipment</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer style="background-color: #1a1a1a; color: white; padding: 2rem 0; margin-top: 4rem;">
+        <div class="container">
+            <p style="text-align: center;">&copy; 2024 FedEx Clone. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Configuration & Services -->
+    <script src="../config/firebase.js"></script>
+    <script src="../config/constants.js"></script>
+    <script src="../services/authService.js"></script>
+    <script src="../services/shipmentService.js"></script>
+    <script src="../services/uiService.js"></script>
+
+    <script>
+        async function initTracking() {
+            const params = new URLSearchParams(window.location.search);
+            const trackingId = params.get('id');
+
+            if (!trackingId) {
+                showError();
+                return;
+            }
+
+            const shipment = await shipmentService.getShipment(trackingId);
+            if (!shipment && trackingId.startsWith('FDX')) {
+                // Try tracking by number
+                const result = await shipmentService.trackShipment(trackingId);
+                if (result.success) {
+                    displayShipment(result.shipment);
+                } else {
+                    showError();
+                }
+            } else if (shipment) {
+                displayShipment(shipment);
+            } else {
+                showError();
+            }
+        }
+
+        async function displayShipment(shipment) {
+            // Update header
+            document.getElementById('shipment-tracking').textContent = shipment.trackingNumber;
+            document.getElementById('shipment-status').textContent = formatStatus(shipment.status);
+            document.getElementById('shipment-status').className = `tracking-status ${statusClass(shipment.status)}`;
+            document.getElementById('shipment-updated').textContent = uiService.formatDate(shipment.updatedAt, 'time');
+
+            // Update details
+            document.getElementById('sender-name').textContent = shipment.senderName;
+            document.getElementById('sender-address').textContent = shipment.senderAddress.street;
+            document.getElementById('sender-city').textContent = shipment.senderAddress.city;
+            document.getElementById('sender-state').textContent = shipment.senderAddress.state;
+            document.getElementById('sender-zip').textContent = shipment.senderAddress.zip;
+
+            document.getElementById('recipient-name').textContent = shipment.recipientName;
+            document.getElementById('recipient-address').textContent = shipment.recipientAddress.street;
+            document.getElementById('recipient-city').textContent = shipment.recipientAddress.city;
+            document.getElementById('recipient-state').textContent = shipment.recipientAddress.state;
+            document.getElementById('recipient-zip').textContent = shipment.recipientAddress.zip;
+
+            document.getElementById('package-description').textContent = shipment.packageDescription;
+            document.getElementById('package-weight').textContent = shipment.weight;
+            document.getElementById('package-value').textContent = uiService.formatCurrency(shipment.declaredValue || 0);
+            document.getElementById('shipping-type').textContent = formatStatus(shipment.shippingType);
+            document.getElementById('total-cost').textContent = uiService.formatCurrency(shipment.totalCost);
+
+            const estimatedDelivery = new Date(shipment.createdAt);
+            const deliveryDays = {
+                standard: 5, express: 3, overnight: 1, international: 10
+            };
+            estimatedDelivery.setDate(estimatedDelivery.getDate() + (deliveryDays[shipment.shippingType] || 5));
+            document.getElementById('estimated-delivery').textContent = uiService.formatDate(estimatedDelivery, 'long');
+
+            // Load tracking events
+            const events = await shipmentService.getTrackingHistory(shipment.id || shipment.trackingNumber);
+            displayTimeline(events);
+
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('tracking-content').style.display = 'block';
+        }
+
+        function displayTimeline(events) {
+            if (!events || events.length === 0) {
+                document.getElementById('timeline').innerHTML = `
+                    <div class="timeline-item">
+                        <div class="timeline-date">${new Date().toLocaleString()}</div>
+                        <div class="timeline-title">Order Placed</div>
+                        <div class="timeline-location">Processing</div>
+                    </div>
+                `;
+                return;
+            }
+
+            const timeline = document.getElementById('timeline');
+            timeline.innerHTML = events.map(event => `
+                <div class="timeline-item">
+                    <div class="timeline-date">${uiService.formatDate(event.createdAt || event.timestamp, 'long')}</div>
+                    <div class="timeline-title">${formatStatus(event.status || event.statusLabel)}</div>
+                    <div class="timeline-location">${event.location || 'In Transit'}</div>
+                </div>
+            `).join('');
+        }
+
+        function showError() {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('error-state').style.display = 'block';
+        }
+
+        function statusClass(status) {
+            const mapping = {
+                [CONSTANTS.STATUS.PENDING]: 'status-pending',
+                [CONSTANTS.STATUS.PICKED_UP]: 'status-picked-up',
+                [CONSTANTS.STATUS.IN_TRANSIT]: 'status-in-transit',
+                [CONSTANTS.STATUS.OUT_FOR_DELIVERY]: 'status-out-for-delivery',
+                [CONSTANTS.STATUS.DELIVERED]: 'status-delivered'
+            };
+            return mapping[status] || 'status-pending';
+        }
+
+        function formatStatus(status) {
+            const mapping = {
+                [CONSTANTS.STATUS.PENDING]: 'Pending',
+                [CONSTANTS.STATUS.PICKED_UP]: 'Picked Up',
+                [CONSTANTS.STATUS.IN_TRANSIT]: 'In Transit',
+                [CONSTANTS.STATUS.OUT_FOR_DELIVERY]: 'Out for Delivery',
+                [CONSTANTS.STATUS.DELIVERED]: 'Delivered',
+                [CONSTANTS.STATUS.CANCELLED]: 'Cancelled',
+                standard: 'Standard',
+                express: 'Express',
+                overnight: 'Overnight',
+                international: 'International'
+            };
+            return mapping[status] || status;
+        }
+
+        function copyTrackingNumber() {
+            const trackingNumber = document.getElementById('shipment-tracking').textContent;
+            navigator.clipboard.writeText(trackingNumber).then(() => {
+                uiService.showToast('Tracking number copied!', 'success');
+            });
+        }
+
+        function shareTracking() {
+            const trackingNumber = document.getElementById('shipment-tracking').textContent;
+            if (navigator.share) {
+                navigator.share({
+                    title: 'FedEx Clone Tracking',
+                    text: `Track my shipment: ${trackingNumber}`,
+                    url: window.location.href
+                });
+            } else {
+                copyTrackingNumber();
+            }
+        }
+
+        // Initialize
+        initTracking();
+    </script>
+</body>
+</html>

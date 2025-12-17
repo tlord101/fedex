@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>International Shipping - FedEx Clone</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <style>
+        .international-container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .restrictions-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .restrictions-box h4 {
+            margin-top: 0;
+            color: #856404;
+        }
+
+        .prohibited-items {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 0 0;
+        }
+
+        .prohibited-items li {
+            padding: 5px 0;
+            color: #721c24;
+        }
+
+        .prohibited-items li.warning {
+            color: #ff6600;
+        }
+
+        .cost-breakdown {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .cost-item.total {
+            border-bottom: 2px solid var(--primary-color);
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 15px;
+            padding-top: 15px;
+        }
+
+        .cost-item.total .amount {
+            color: var(--primary-color);
+        }
+
+        .customs-form {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 2px dashed var(--primary-color);
+        }
+
+        .customs-form h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        .duration-badge {
+            display: inline-block;
+            background: #e7f3ff;
+            color: #0066cc;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border: 1px solid #0066cc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .info-box h4 {
+            margin-top: 0;
+            color: #0066cc;
+        }
+
+        .insurance-option {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .insurance-option:hover {
+            border-color: var(--primary-color);
+            background: #f9f9f9;
+        }
+
+        .insurance-option input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .currency-converter {
+            background: #f0f0f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .currency-input-group {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .currency-input-group input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .currency-input-group select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 4px;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 4px;
+            margin: 10px 0;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .international-container {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1>FedEx</h1>
+            <div>
+                <a href="../index.html" class="btn-link">Home</a>
+                <a href="../pages/dashboard.html" class="btn-link">Dashboard</a>
+                <a href="../pages/tracking.html" class="btn-link">Track</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="margin-top: 30px;">
+        <h2>International Shipping</h2>
+
+        <div class="international-container">
+            <!-- Main Form -->
+            <div>
+                <!-- Info Box -->
+                <div class="info-box">
+                    <h4>📦 International Shipping</h4>
+                    <p>Complete your international shipment with customs declarations and multi-currency support.</p>
+                </div>
+
+                <!-- Error Messages -->
+                <div class="error-message" id="errorMessage"></div>
+                <div class="success-message" id="successMessage"></div>
+
+                <form id="internationalForm">
+                    <!-- Destination Section -->
+                    <div class="form-section">
+                        <h3>Destination Country</h3>
+                        <div class="form-group">
+                            <label>Destination Country *</label>
+                            <select id="destCountry" required onchange="onCountryChange()">
+                                <option value="">Select country...</option>
+                                <option value="CA">Canada</option>
+                                <option value="UK">United Kingdom</option>
+                                <option value="AU">Australia</option>
+                                <option value="JP">Japan</option>
+                            </select>
+                        </div>
+
+                        <!-- Restrictions Display -->
+                        <div id="restrictionsContainer"></div>
+                    </div>
+
+                    <!-- Item Information -->
+                    <div class="form-section">
+                        <h3>Item Information</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Item Description *</label>
+                                <input type="text" id="itemDescription" placeholder="e.g., Electronics, Clothing" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Item Type *</label>
+                                <select id="itemType" required>
+                                    <option value="">Select type...</option>
+                                    <option value="electronics">Electronics</option>
+                                    <option value="textiles">Textiles</option>
+                                    <option value="food">Food</option>
+                                    <option value="machinery">Machinery</option>
+                                    <option value="chemicals">Chemicals</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Item Value (USD) *</label>
+                                <input type="number" id="itemValue" placeholder="0.00" step="0.01" required onchange="updateCostBreakdown()">
+                            </div>
+                            <div class="form-group">
+                                <label>Weight (kg) *</label>
+                                <input type="number" id="weight" placeholder="0.0" step="0.1" required onchange="updateCostBreakdown()">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Quantity</label>
+                            <input type="number" id="quantity" value="1" min="1">
+                        </div>
+                    </div>
+
+                    <!-- Customs Declaration -->
+                    <div class="form-section">
+                        <h3>Customs Declaration</h3>
+                        <div class="form-group">
+                            <label>Purpose of Shipment *</label>
+                            <select id="purposeOfShipment" required>
+                                <option value="">Select purpose...</option>
+                                <option value="sale">Sale</option>
+                                <option value="gift">Gift</option>
+                                <option value="sample">Commercial Sample</option>
+                                <option value="repair">Repair</option>
+                                <option value="return">Return</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Declaration Statement *</label>
+                            <textarea id="customsDeclaration" placeholder="Describe the contents and declare their value..." rows="4" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="certifyDeclaration" required>
+                                I certify that the information provided is true and accurate
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Shipping Options -->
+                    <div class="form-section">
+                        <h3>Shipping Options</h3>
+                        <div class="form-group">
+                            <label>Shipping Type *</label>
+                            <select id="shippingType" required onchange="updateCostBreakdown()">
+                                <option value="STANDARD">Standard (10-14 days)</option>
+                                <option value="EXPRESS">Express (5-7 days)</option>
+                                <option value="OVERNIGHT">Overnight (1-3 days)</option>
+                            </select>
+                        </div>
+
+                        <!-- Delivery Time Estimate -->
+                        <div id="deliveryEstimate" style="margin-top: 10px;"></div>
+                    </div>
+
+                    <!-- Insurance Option -->
+                    <div class="form-section">
+                        <h3>Insurance</h3>
+                        <div id="insuranceRecommendation"></div>
+                        <div id="insuranceOptions"></div>
+                    </div>
+
+                    <!-- Recipient Information -->
+                    <div class="form-section">
+                        <h3>Recipient Information</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Recipient Name *</label>
+                                <input type="text" id="recipientName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Recipient Email *</label>
+                                <input type="email" id="recipientEmail" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Recipient Phone *</label>
+                                <input type="tel" id="recipientPhone" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Recipient Address *</label>
+                                <input type="text" id="recipientAddress" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Currency Converter -->
+                    <div class="form-section">
+                        <h3>Currency Converter</h3>
+                        <div class="currency-converter">
+                            <label>Convert Currency</label>
+                            <div class="currency-input-group">
+                                <input type="number" id="convertAmount" placeholder="Amount" step="0.01">
+                                <select id="fromCurrency">
+                                    <option value="USD">USD</option>
+                                    <option value="EUR">EUR</option>
+                                    <option value="GBP">GBP</option>
+                                    <option value="CAD">CAD</option>
+                                    <option value="AUD">AUD</option>
+                                    <option value="JPY">JPY</option>
+                                </select>
+                                <button type="button" class="btn" onclick="convertCurrency()">→</button>
+                                <select id="toCurrency">
+                                    <option value="USD">USD</option>
+                                    <option value="EUR">EUR</option>
+                                    <option value="GBP">GBP</option>
+                                    <option value="CAD">CAD</option>
+                                    <option value="AUD">AUD</option>
+                                    <option value="JPY">JPY</option>
+                                </select>
+                            </div>
+                            <div id="conversionResult" style="margin-top: 10px; color: #666;"></div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn" style="width: 100%; padding: 15px; font-size: 16px;">
+                        Create Shipment
+                    </button>
+                </form>
+            </div>
+
+            <!-- Right Sidebar - Cost Summary -->
+            <div>
+                <div class="form-section" style="position: sticky; top: 20px;">
+                    <h3 style="margin-top: 0;">Cost Summary</h3>
+                    
+                    <!-- Duties & Taxes -->
+                    <div id="dutiesAndTaxesContainer"></div>
+
+                    <!-- Cost Breakdown -->
+                    <div class="cost-breakdown">
+                        <div class="cost-item">
+                            <span>Base Shipping:</span>
+                            <span class="amount" id="baseShipping">$0.00</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>Customs Fee:</span>
+                            <span class="amount" id="customsFee">$25.00</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>Insurance:</span>
+                            <span class="amount" id="insuranceAmount">$0.00</span>
+                        </div>
+                        <div class="cost-item total">
+                            <span>Total Cost:</span>
+                            <span class="amount" id="totalCost">$0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Estimate Card -->
+                    <div id="estimateCard" style="margin-top: 15px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../config/firebase.js"></script>
+    <script src="../config/constants.js"></script>
+    <script src="../services/authService.js"></script>
+    <script src="../services/shipmentService.js"></script>
+    <script src="../services/rateService.js"></script>
+    <script src="../services/uiService.js"></script>
+    <script src="../services/internationalService.js"></script>
+
+    <script>
+        // Check authentication
+        authService.subscribe((user) => {
+            if (!user) {
+                window.location.href = '../login.html';
+            }
+        });
+
+        // Event: Country changed
+        async function onCountryChange() {
+            const country = document.getElementById('destCountry').value;
+            if (!country) return;
+
+            // Display restrictions
+            const restrictions = internationalService.getShippingRestrictions(country);
+            const container = document.getElementById('restrictionsContainer');
+            
+            if (restrictions.success) {
+                let html = '<div class="restrictions-box">';
+                html += '<h4>⚠️ Shipping Restrictions & Requirements</h4>';
+                
+                if (restrictions.prohibitedItems.length > 0) {
+                    html += '<p><strong>Prohibited Items:</strong></p><ul class="prohibited-items">';
+                    restrictions.prohibitedItems.forEach(item => {
+                        html += `<li>${item}</li>`;
+                    });
+                    html += '</ul>';
+                }
+
+                if (restrictions.restrictedItems.length > 0) {
+                    html += '<p><strong>Restricted Items (May Require Permission):</strong></p><ul class="prohibited-items">';
+                    restrictions.restrictedItems.forEach(item => {
+                        html += `<li class="warning">${item}</li>`;
+                    });
+                    html += '</ul>';
+                }
+
+                html += '<p><strong>Max Weight:</strong> ' + restrictions.maxWeight + ' kg</p>';
+                html += '<p><strong>Max Value:</strong> $' + restrictions.maxValue + '</p>';
+                html += '</div>';
+                
+                container.innerHTML = html;
+            }
+
+            updateCostBreakdown();
+        }
+
+        // Update cost breakdown
+        function updateCostBreakdown() {
+            const weight = parseFloat(document.getElementById('weight').value) || 0;
+            const itemValue = parseFloat(document.getElementById('itemValue').value) || 0;
+            const destCountry = document.getElementById('destCountry').value;
+            const shippingType = document.getElementById('shippingType').value;
+
+            if (!destCountry || !weight || !itemValue) {
+                return;
+            }
+
+            // Calculate customs duty
+            const itemType = document.getElementById('itemType').value || 'other';
+            const dutyResult = internationalService.calculateCustomsDuty(itemValue, itemType, destCountry);
+
+            // Display duties and taxes
+            if (dutyResult.success) {
+                const dutiesContainer = document.getElementById('dutiesAndTaxesContainer');
+                dutiesContainer.innerHTML = `
+                    <div class="info-box" style="background: #f0f0f0; border-color: #999;">
+                        <h4>💰 Duties & Taxes</h4>
+                        <p><strong>Duty Rate:</strong> ${(dutyResult.dutyRate * 100).toFixed(1)}%</p>
+                        <p><strong>Duty Amount:</strong> $${dutyResult.dutyAmount}</p>
+                        <p><strong>Tax Rate (VAT):</strong> ${(dutyResult.taxRate * 100).toFixed(1)}%</p>
+                        <p><strong>Tax Amount:</strong> $${dutyResult.taxAmount}</p>
+                        <p style="border-top: 1px solid #ccc; padding-top: 10px; font-weight: bold;">
+                            Duties & Taxes: $${dutyResult.totalDutyAndTax}
+                        </p>
+                    </div>
+                `;
+            }
+
+            // Calculate shipping cost
+            const costResult = internationalService.calculateInternationalShippingCost(
+                weight, 
+                'US', 
+                destCountry, 
+                shippingType
+            );
+
+            document.getElementById('baseShipping').textContent = '$' + costResult.baseShipping;
+            document.getElementById('customsFee').textContent = '$' + costResult.customsFee;
+
+            const totalCost = parseFloat(costResult.baseShipping) + 
+                            parseFloat(costResult.customsFee) + 
+                            (parseFloat(document.getElementById('insuranceAmount').textContent.replace('$', '')) || 0);
+            
+            document.getElementById('totalCost').textContent = '$' + totalCost.toFixed(2);
+
+            // Display delivery estimate
+            const estimate = internationalService.getInternationalShippingTime('US', destCountry, shippingType);
+            const estimateCard = document.getElementById('estimateCard');
+            estimateCard.innerHTML = `
+                <div class="info-box">
+                    <h4>📅 Estimated Delivery</h4>
+                    <p>Approximately <strong>${estimate.estimatedDays} business days</strong></p>
+                    <p style="font-size: 12px; color: #666;">
+                        Delivery by: ${estimate.estimatedDeliveryDate.toLocaleDateString()}
+                    </p>
+                </div>
+            `;
+
+            // Display insurance recommendation
+            const insurance = internationalService.recommendInsurance(itemValue, destCountry);
+            const insuranceContainer = document.getElementById('insuranceOptions');
+            insuranceContainer.innerHTML = `
+                <div class="insurance-option">
+                    <input type="radio" name="insurance" value="none" checked onchange="updateInsurance()">
+                    <strong>No Insurance</strong><br>
+                    <small>$0.00</small>
+                </div>
+            `;
+
+            if (insurance.recommended) {
+                insuranceContainer.innerHTML += `
+                    <div class="insurance-option" style="border-color: var(--primary-color);">
+                        <input type="radio" name="insurance" value="full" onchange="updateInsurance()">
+                        <strong>⭐ Full Coverage (Recommended)</strong><br>
+                        <small>Coverage: $${insurance.coverage} - Cost: $${insurance.estimatedCost}</small>
+                    </div>
+                `;
+            }
+        }
+
+        // Update insurance amount
+        function updateInsurance() {
+            const itemValue = parseFloat(document.getElementById('itemValue').value) || 0;
+            const insurance = internationalService.recommendInsurance(itemValue, document.getElementById('destCountry').value);
+            
+            const selectedInsurance = document.querySelector('input[name="insurance"]:checked').value;
+            const insuranceAmount = selectedInsurance === 'full' ? insurance.estimatedCost : '0.00';
+            
+            document.getElementById('insuranceAmount').textContent = '$' + parseFloat(insuranceAmount).toFixed(2);
+            updateCostBreakdown();
+        }
+
+        // Convert currency
+        async function convertCurrency() {
+            const amount = parseFloat(document.getElementById('convertAmount').value);
+            const from = document.getElementById('fromCurrency').value;
+            const to = document.getElementById('toCurrency').value;
+
+            if (!amount || amount <= 0) {
+                document.getElementById('conversionResult').textContent = 'Enter a valid amount';
+                return;
+            }
+
+            const result = await internationalService.convertCurrency(amount, from, to);
+            const resultDiv = document.getElementById('conversionResult');
+            
+            if (result.success) {
+                resultDiv.innerHTML = `<strong>${result.originalAmount} ${result.originalCurrency} = ${result.convertedAmount} ${result.convertedCurrency}</strong><br><small>Rate: 1 ${result.originalCurrency} = ${result.rate.toFixed(4)} ${result.convertedCurrency}</small>`;
+            } else {
+                resultDiv.textContent = 'Exchange rate not available';
+            }
+        }
+
+        // Form submission
+        document.getElementById('internationalForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const destCountry = document.getElementById('destCountry').value;
+            const itemType = document.getElementById('itemType').value;
+
+            // Validate shipment
+            const shipmentData = {
+                destCountry,
+                itemType,
+                weight: parseFloat(document.getElementById('weight').value),
+                itemValue: parseFloat(document.getElementById('itemValue').value),
+                customsDeclaration: document.getElementById('customsDeclaration').value
+            };
+
+            const validation = internationalService.validateInternationalShipment(shipmentData);
+            if (!validation.valid) {
+                document.getElementById('errorMessage').textContent = validation.errors.join('; ');
+                document.getElementById('errorMessage').style.display = 'block';
+                return;
+            }
+
+            // Create shipment
+            uiService.showLoading(true);
+
+            const shipment = {
+                senderName: 'Current User', // From auth
+                originCity: 'New York',
+                originState: 'NY',
+                originCountry: 'US',
+                senderEmail: 'user@example.com',
+                senderPhone: '1234567890',
+                recipientName: document.getElementById('recipientName').value,
+                destCity: 'London',
+                destState: 'London',
+                destCountry: destCountry,
+                recipientEmail: document.getElementById('recipientEmail').value,
+                recipientPhone: document.getElementById('recipientPhone').value,
+                itemDescription: document.getElementById('itemDescription').value,
+                itemType,
+                weight: shipmentData.weight,
+                itemValue: shipmentData.itemValue,
+                quantity: parseInt(document.getElementById('quantity').value),
+                customsDeclaration: shipmentData.customsDeclaration,
+                purposeOfShipment: document.getElementById('purposeOfShipment').value,
+                shippingType: document.getElementById('shippingType').value,
+                insurance: document.querySelector('input[name="insurance"]:checked').value !== 'none'
+            };
+
+            const result = await shipmentService.createShipment(shipment);
+            uiService.showLoading(false);
+
+            if (result.success) {
+                document.getElementById('successMessage').textContent = 'International shipment created successfully! Tracking #: ' + result.trackingNumber;
+                document.getElementById('successMessage').style.display = 'block';
+                
+                setTimeout(() => {
+                    window.location.href = '../pages/tracking.html?tracking=' + result.trackingNumber;
+                }, 2000);
+            } else {
+                document.getElementById('errorMessage').textContent = result.error;
+                document.getElementById('errorMessage').style.display = 'block';
+            }
+        });
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            updateCostBreakdown();
+        });
+    </script>
+</body>
+</html>

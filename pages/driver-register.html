@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Registration - FedEx Clone</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-functions.js"></script>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">📦 FedEx Clone</div>
+            <div class="nav-buttons">
+                <a href="../index.html" class="btn btn-outline btn-small">Back to Home</a>
+            </div>
+        </nav>
+    </header>
+
+    <main style="min-height: calc(100vh - 200px); display: flex; align-items: center; padding: 2rem 0;">
+        <div class="container" style="max-width: 600px;">
+            <div class="card">
+                <h2 style="text-align: center; margin-bottom: 0.5rem;">Become a FedEx Driver</h2>
+                <p style="text-align: center; color: var(--text-light); margin-bottom: 2rem;">
+                    Join our delivery network and earn money with your own schedule
+                </p>
+
+                <form id="driver-registration-form">
+                    <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">Personal Information</h3>
+
+                    <div class="form-group">
+                        <label for="full-name">Full Name</label>
+                        <input type="text" id="full-name" name="fullName" required>
+                    </div>
+
+                    <div class="grid grid-2">
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone</label>
+                            <input type="tel" id="phone" name="phone" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="date-of-birth">Date of Birth</label>
+                        <input type="date" id="date-of-birth" name="dateOfBirth" required>
+                    </div>
+
+                    <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">Address Information</h3>
+
+                    <div class="form-group">
+                        <label for="address">Street Address</label>
+                        <input type="text" id="address" name="address" required>
+                    </div>
+
+                    <div class="grid grid-2">
+                        <div class="form-group">
+                            <label for="city">City</label>
+                            <input type="text" id="city" name="city" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="state">State</label>
+                            <input type="text" id="state" name="state" required>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-2">
+                        <div class="form-group">
+                            <label for="zip">ZIP Code</label>
+                            <input type="text" id="zip" name="zip" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="country">Country</label>
+                            <input type="text" id="country" name="country" required>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">Vehicle Information</h3>
+
+                    <div class="grid grid-2">
+                        <div class="form-group">
+                            <label for="vehicle-type">Vehicle Type</label>
+                            <select id="vehicle-type" name="vehicleType" required>
+                                <option value="">Select vehicle</option>
+                                <option value="motorcycle">Motorcycle</option>
+                                <option value="car">Car</option>
+                                <option value="van">Van</option>
+                                <option value="truck">Truck</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="vehicle-year">Vehicle Year</label>
+                            <input type="number" id="vehicle-year" name="vehicleYear" min="2000" max="2025" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="license-plate">License Plate</label>
+                        <input type="text" id="license-plate" name="licensePlate" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="license-number">Driver License Number</label>
+                        <input type="text" id="license-number" name="licenseNumber" required>
+                    </div>
+
+                    <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">Bank Information</h3>
+
+                    <div class="form-group">
+                        <label for="account-name">Bank Account Holder</label>
+                        <input type="text" id="account-name" name="accountName" required>
+                    </div>
+
+                    <div class="grid grid-2">
+                        <div class="form-group">
+                            <label for="bank-name">Bank Name</label>
+                            <input type="text" id="bank-name" name="bankName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="routing-number">Routing Number</label>
+                            <input type="text" id="routing-number" name="routingNumber" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="account-number">Account Number</label>
+                        <input type="text" id="account-number" name="accountNumber" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" name="termsAgreed" required>
+                            I agree to the Terms of Service and Privacy Policy
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;">Submit Application</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer style="background-color: #1a1a1a; color: white; padding: 2rem 0; text-align: center;">
+        <p>&copy; 2024 FedEx Clone. All rights reserved.</p>
+    </footer>
+
+    <script src="../config/firebase.js"></script>
+    <script src="../config/constants.js"></script>
+    <script src="../services/authService.js"></script>
+    <script src="../services/driverService.js"></script>
+    <script src="../services/uiService.js"></script>
+
+    <script>
+        document.getElementById('driver-registration-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const driverData = {
+                fullName: document.getElementById('full-name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                dateOfBirth: document.getElementById('date-of-birth').value,
+                address: {
+                    street: document.getElementById('address').value,
+                    city: document.getElementById('city').value,
+                    state: document.getElementById('state').value,
+                    zip: document.getElementById('zip').value,
+                    country: document.getElementById('country').value
+                },
+                vehicle: {
+                    type: document.getElementById('vehicle-type').value,
+                    year: parseInt(document.getElementById('vehicle-year').value),
+                    licensePlate: document.getElementById('license-plate').value
+                },
+                licenseNumber: document.getElementById('license-number').value,
+                bankInfo: {
+                    accountHolder: document.getElementById('account-name').value,
+                    bankName: document.getElementById('bank-name').value,
+                    routingNumber: document.getElementById('routing-number').value,
+                    accountNumber: document.getElementById('account-number').value
+                }
+            };
+
+            uiService.showLoading('Processing application...');
+            const result = await driverService.registerDriver(driverData);
+            uiService.hideLoading();
+
+            if (result.success) {
+                uiService.showToast('Application submitted! We\'ll review it shortly.', 'success');
+                setTimeout(() => {
+                    window.location.href = 'driver-dashboard.html';
+                }, 2000);
+            } else {
+                uiService.showToast('Error: ' + result.error, 'error');
+            }
+        });
+    </script>
+</body>
+</html>

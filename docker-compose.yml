@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  fedex-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - NODE_ENV=development
+    command: http-server . -p 8000 -c-1
+
+  # Optional: Add Firebase emulator
+  firebase-emulator:
+    image: google/cloud-sdk:emulators
+    ports:
+      - "5000:5000"  # Hosting
+      - "9099:9099"  # Auth
+      - "8080:8080"  # Firestore
+    environment:
+      - FIREBASE_DATABASE_EMULATOR_HOST=localhost:9000
+      - FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
