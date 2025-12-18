@@ -4,12 +4,14 @@
  */
 
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "your-project.firebaseapp.com",
-    projectId: "your-project-id",
-    storageBucket: "your-project.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "1:123456789:web:abcdef123456"
+  apiKey: "AIzaSyAocB-xjAk8-xIIcDLjx72k9I8OK4jHVgE",
+  authDomain: "tlord-1ab38.firebaseapp.com",
+  databaseURL: "https://tlord-1ab38-default-rtdb.firebaseio.com",
+  projectId: "tlord-1ab38",
+  storageBucket: "tlord-1ab38.firebasestorage.app",
+  messagingSenderId: "750743868519",
+  appId: "1:750743868519:web:5a937bc8e75e86a96570c2",
+  measurementId: "G-5MDEM4EWHJ"
 };
 
 // Initialize Firebase
