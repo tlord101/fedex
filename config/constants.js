@@ -3,6 +3,8 @@
  */
 
 const CONSTANTS = {
+    // Auth toggle
+    AUTH_ENABLED: false,
     // Shipping Types
     SHIPPING_TYPES: {
         STANDARD: 'standard',

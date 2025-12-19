@@ -5,10 +5,27 @@
 
 class AuthService {
     constructor() {
+        this.observers = [];
+        this.disabled = (window.CONSTANTS && window.CONSTANTS.AUTH_ENABLED === false);
+
+        if (this.disabled) {
+            this.auth = null;
+            this.db = null;
+            this.currentUser = {
+                uid: 'dev-admin',
+                email: 'admin@local',
+                role: (window.CONSTANTS && window.CONSTANTS.USER_ROLES && window.CONSTANTS.USER_ROLES.ADMIN) || 'admin',
+                isActive: true
+            };
+            // Immediately notify subscribers in disabled mode
+            // Defer to next tick to allow subscriber registration first when needed
+            setTimeout(() => this.notifyObservers('auth-change', this.currentUser), 0);
+            return;
+        }
+
         this.auth = window.firebaseApp.auth;
         this.db = window.firebaseApp.db;
         this.currentUser = null;
-        this.observers = [];
         this.initAuthStateListener();
     }
 
@@ -16,6 +33,7 @@ class AuthService {
      * Initialize auth state listener
      */
     initAuthStateListener() {
+        if (this.disabled) return; // no-op when disabled
         this.auth.onAuthStateChanged(async (user) => {
             if (user) {
                 this.currentUser = await this.getUserProfile(user.uid);
@@ -31,6 +49,14 @@ class AuthService {
      * Sign up new user
      */
     async signUp(email, password, userData) {
+        if (this.disabled) {
+            this.currentUser = {
+                uid: 'dev-admin', email: email || 'admin@local',
+                role: (CONSTANTS.USER_ROLES.ADMIN), isActive: true
+            };
+            this.notifyObservers('auth-change', this.currentUser);
+            return { success: true, uid: this.currentUser.uid };
+        }
         try {
             const credential = await this.auth.createUserWithEmailAndPassword(email, password);
             const uid = credential.user.uid;
@@ -63,6 +89,14 @@ class AuthService {
      * Sign in user
      */
     async signIn(email, password) {
+        if (this.disabled) {
+            this.currentUser = {
+                uid: 'dev-admin', email: email || 'admin@local',
+                role: (CONSTANTS.USER_ROLES.ADMIN), isActive: true
+            };
+            this.notifyObservers('auth-change', this.currentUser);
+            return { success: true, user: { uid: this.currentUser.uid } };
+        }
         try {
             const credential = await this.auth.signInWithEmailAndPassword(email, password);
             return { success: true, user: credential.user };
@@ -76,6 +110,9 @@ class AuthService {
      * Sign in with Google
      */
     async signInWithGoogle() {
+        if (this.disabled) {
+            return this.signIn('admin@local', '');
+        }
         try {
             const provider = new firebase.auth.GoogleAuthProvider();
             const credential = await this.auth.signInWithPopup(provider);
@@ -108,6 +145,11 @@ class AuthService {
      * Sign out user
      */
     async signOut() {
+        if (this.disabled) {
+            this.currentUser = null;
+            this.notifyObservers('auth-change', null);
+            return { success: true };
+        }
         try {
             await this.auth.signOut();
             this.currentUser = null;
@@ -122,6 +164,9 @@ class AuthService {
      * Get user profile
      */
     async getUserProfile(uid) {
+        if (this.disabled) {
+            return this.currentUser || { uid: 'dev-admin', email: 'admin@local', role: CONSTANTS.USER_ROLES.ADMIN, isActive: true };
+        }
         try {
             const userSnap = await this.db.collection(CONSTANTS.COLLECTIONS.USERS).doc(uid).get();
             return userSnap.exists ? userSnap.data() : null;
@@ -164,6 +209,7 @@ class AuthService {
      * Get current user
      */
     getCurrentUser() {
+        if (this.disabled) return this.currentUser;
         return this.currentUser;
     }
 
@@ -171,6 +217,7 @@ class AuthService {
      * Check if user is authenticated
      */
     isAuthenticated() {
+        if (this.disabled) return true;
         return !!this.currentUser;
     }
 
@@ -178,6 +225,7 @@ class AuthService {
      * Check user role
      */
     hasRole(role) {
+        if (this.disabled) return role === CONSTANTS.USER_ROLES.ADMIN;
         return this.currentUser && this.currentUser.role === role;
     }
 
@@ -186,6 +234,10 @@ class AuthService {
      */
     subscribe(callback) {
         this.observers.push(callback);
+        // Immediately notify in disabled mode to simulate signed-in admin
+        if (this.disabled) {
+            try { callback('auth-change', this.currentUser); } catch (_) {}
+        }
     }
 
     /**
