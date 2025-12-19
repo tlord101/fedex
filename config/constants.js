@@ -49,7 +49,8 @@ const CONSTANTS = {
         LOCATIONS: 'locations',
         DRIVERS: 'drivers',
         PAYMENTS: 'payments',
-        INVOICES: 'invoices'
+        INVOICES: 'invoices',
+        ADMIN_LOGS: 'admin_logs'
     },
 
     // API Endpoints (for future REST integration)

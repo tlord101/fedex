@@ -9,6 +9,27 @@ class AdminService {
     }
 
     /**
+     * Log admin action for audit trail
+     */
+    async logAdminAction(action, target = {}, meta = {}) {
+        try {
+            const admin = window.authService?.getCurrentUser?.() || null;
+            const payload = {
+                action,
+                targetType: target.type || null,
+                targetId: target.id || null,
+                meta: meta || {},
+                adminId: admin?.uid || null,
+                adminEmail: admin?.email || null,
+                createdAt: new Date()
+            };
+            await this.db.collection(CONSTANTS.COLLECTIONS.ADMIN_LOGS).add(payload);
+        } catch (e) {
+            console.warn('Admin log write failed:', e?.message || e);
+        }
+    }
+
+    /**
      * Get system statistics
      */
     async getSystemStats() {
@@ -123,7 +144,7 @@ class AdminService {
                 verifiedAt: new Date(),
                 updatedAt: new Date()
             });
-
+            await this.logAdminAction('verify_driver', { type: 'driver', id: driverId });
             return { success: true };
         } catch (error) {
             console.error('Verify driver error:', error);
@@ -142,7 +163,7 @@ class AdminService {
                 rejectionReason: reason,
                 updatedAt: new Date()
             });
-
+            await this.logAdminAction('reject_driver', { type: 'driver', id: driverId }, { reason });
             return { success: true };
         } catch (error) {
             console.error('Reject driver error:', error);
@@ -160,7 +181,7 @@ class AdminService {
                 deactivatedAt: new Date(),
                 updatedAt: new Date()
             });
-
+            await this.logAdminAction('deactivate_user', { type: 'user', id: userId });
             return { success: true };
         } catch (error) {
             console.error('Deactivate user error:', error);
@@ -177,7 +198,7 @@ class AdminService {
                 ...updates,
                 updatedAt: new Date()
             });
-
+            await this.logAdminAction('update_rate', { type: 'rate', id: rateId }, { updates });
             return { success: true };
         } catch (error) {
             console.error('Update rate error:', error);
@@ -207,7 +228,7 @@ class AdminService {
                 ...settings,
                 updatedAt: new Date()
             }, { merge: true });
-
+            await this.logAdminAction('update_settings', { type: 'system', id: 'settings' }, { settings });
             return { success: true };
         } catch (error) {
             console.error('Update system settings error:', error);
@@ -247,6 +268,22 @@ class AdminService {
         } catch (error) {
             console.error('Generate report error:', error);
             return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Fetch admin logs with optional filters
+     */
+    async getAdminLogs({ limit = 50, action, adminId } = {}) {
+        try {
+            let query = this.db.collection(CONSTANTS.COLLECTIONS.ADMIN_LOGS).orderBy('createdAt', 'desc').limit(limit);
+            if (action) query = query.where('action', '==', action);
+            if (adminId) query = query.where('adminId', '==', adminId);
+            const snap = await query.get();
+            return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        } catch (error) {
+            console.error('Get admin logs error:', error);
+            return [];
         }
     }
 }

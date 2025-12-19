@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - FedEx Clone</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <!-- Firebase v9 Compat (required by config/firebase.js) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-functions-compat.js"></script>
+  <style>
+    .nav-tabs{display:flex;gap:10px;border-bottom:2px solid #ddd;margin:20px 0}
+    .nav-tab{padding:10px 16px;background:none;border:none;cursor:pointer;color:#666;border-bottom:3px solid transparent}
+    .nav-tab.active{color:var(--primary-color);border-bottom-color:var(--primary-color)}
+    .tab{display:none}
+    .tab.active{display:block}
+    .admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:20px}
+    .card{background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:16px}
+    .table{width:100%;border-collapse:collapse;font-size:14px}
+    .table th{background:#f7f7f7;text-align:left;padding:10px;border-bottom:1px solid #e8e8e8}
+    .table td{padding:10px;border-bottom:1px solid #f0f0f0}
+    .btn-sm{padding:6px 10px;border:none;border-radius:4px;background:var(--primary-color);color:#fff;cursor:pointer}
+    .btn-danger{background:#dc3545}
+    .muted{color:#777}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <h1>FedEx Admin</h1>
+      <div>
+        <a href="/" class="btn-link">Home</a>
+        <button id="logoutBtn" class="btn-link">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container" style="margin-top:24px">
+    <div class="admin-grid">
+      <div class="card"><div class="muted">Total Users</div><div id="statUsers" style="font-weight:700;font-size:24px">0</div></div>
+      <div class="card"><div class="muted">Total Shipments</div><div id="statShipments" style="font-weight:700;font-size:24px">0</div></div>
+      <div class="card"><div class="muted">Total Drivers</div><div id="statDrivers" style="font-weight:700;font-size:24px">0</div></div>
+      <div class="card"><div class="muted">Total Revenue</div><div id="statRevenue" style="font-weight:700;font-size:24px">$0</div></div>
+    </div>
+
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-tab="users">Users</button>
+      <button class="nav-tab" data-tab="drivers">Drivers</button>
+      <button class="nav-tab" data-tab="shipments">Shipments</button>
+      <button class="nav-tab" data-tab="rates">Rates</button>
+      <button class="nav-tab" data-tab="settings">Settings</button>
+      <button class="nav-tab" data-tab="parcels">Parcels</button>
+      <button class="nav-tab" data-tab="logs">Logs</button>
+    </div>
+
+    <section id="users" class="tab active">
+      <div class="card">
+        <h3>Manage Users</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 12px">
+          <select id="userRoleFilter">
+            <option value="">All Roles</option>
+            <option value="customer">Customer</option>
+            <option value="driver">Driver</option>
+            <option value="admin">Admin</option>
+          </select>
+          <select id="userStatusFilter">
+            <option value="">All Status</option>
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+          <button class="btn-sm" onclick="loadUsers()">Filter</button>
+        </div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead><tr><th>Email</th><th>Name</th><th>Role</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+            <tbody id="usersTable"><tr><td colspan="6" class="muted">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="drivers" class="tab">
+      <div class="card">
+        <h3>Manage Drivers</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 12px">
+          <select id="driverStatusFilter">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="pending">Pending</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          <select id="driverVerifiedFilter">
+            <option value="">All Verification</option>
+            <option value="true">Verified</option>
+            <option value="false">Not Verified</option>
+          </select>
+          <button class="btn-sm" onclick="loadDrivers()">Filter</button>
+        </div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Status</th><th>Rating</th><th>Verified</th><th>Actions</th></tr></thead>
+            <tbody id="driversTable"><tr><td colspan="7" class="muted">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="shipments" class="tab">
+      <div class="card">
+        <h3>Manage Shipments</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 12px">
+          <select id="shipmentStatusFilter">
+            <option value="">All Status</option>
+            <option value="PENDING">Pending</option>
+            <option value="PICKED_UP">Picked Up</option>
+            <option value="IN_TRANSIT">In Transit</option>
+            <option value="DELIVERED">Delivered</option>
+            <option value="CANCELLED">Cancelled</option>
+          </select>
+          <select id="shipmentTypeFilter">
+            <option value="">All Types</option>
+            <option value="STANDARD">Standard</option>
+            <option value="EXPRESS">Express</option>
+            <option value="OVERNIGHT">Overnight</option>
+          </select>
+          <button class="btn-sm" onclick="loadShipments()">Filter</button>
+        </div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead><tr><th>Tracking #</th><th>Status</th><th>From</th><th>To</th><th>Total Cost</th><th>Created</th><th>Actions</th></tr></thead>
+            <tbody id="shipmentsTable"><tr><td colspan="7" class="muted">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="rates" class="tab">
+      <div class="card">
+        <h3>Manage Shipping Rates</h3>
+        <div class="table-responsive">
+          <table class="table">
+            <thead><tr><th>Weight Range</th><th>Distance Range</th><th>Base Rate</th><th>Type</th><th>Actions</th></tr></thead>
+            <tbody id="ratesTable"><tr><td colspan="5" class="muted">Load via adminService in future</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="settings" class="tab">
+      <div class="card">
+        <h3>System Settings</h3>
+        <form id="settingsForm">
+          <div class="form-group"><label>Commission Rate (%)</label><input type="number" id="commissionRate" value="15" min="0" max="100" step="0.1"></div>
+          <div class="form-group"><label>Tax Rate (%)</label><input type="number" id="taxRate" value="10" min="0" max="100" step="0.1"></div>
+          <div class="form-group"><label>Minimum Order Value ($)</label><input type="number" id="minOrderValue" value="5" min="0" step="0.01"></div>
+          <div class="form-group"><label>Maximum Shipment Weight (kg)</label><input type="number" id="maxWeight" value="30" min="0" step="0.5"></div>
+          <button type="submit" class="btn-sm">Save Settings</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="parcels" class="tab">
+      <div class="card">
+        <h3>Create Parcel (Quick)</h3>
+        <form id="parcelForm" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;align-items:end">
+          <div><label>Origin Name</label><input id="originName" required></div>
+          <div><label>Origin Lat</label><input id="originLat" type="number" step="any" required></div>
+          <div><label>Origin Lng</label><input id="originLng" type="number" step="any" required></div>
+          <div><label>Destination Name</label><input id="destName" required></div>
+          <div><label>Dest Lat</label><input id="destLat" type="number" step="any" required></div>
+          <div><label>Dest Lng</label><input id="destLng" type="number" step="any" required></div>
+          <div><label>Duration (min)</label><input id="durationMinutes" type="number" min="1" value="60" required></div>
+          <button type="submit" class="btn-sm">Create</button>
+        </form>
+        <div id="parcelMsg" class="muted" style="margin-top:8px"></div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <h3>Recent Parcels</h3>
+        <div class="table-responsive">
+          <table class="table">
+            <thead><tr><th>ID</th><th>Route</th><th>Progress</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="parcelsTable"><tr><td colspan="5" class="muted">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="logs" class="tab">
+      <div class="card">
+        <h3>Admin Logs</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 12px">
+          <input id="logActionFilter" placeholder="Filter action (e.g. verify_driver)" />
+          <input id="logAdminIdFilter" placeholder="Filter adminId" />
+          <button class="btn-sm" onclick="loadLogs()">Apply</button>
+        </div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead><tr><th>Time</th><th>Admin</th><th>Action</th><th>Target</th><th>Meta</th></tr></thead>
+            <tbody id="logsTable"><tr><td colspan="5" class="muted">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="config/firebase.js"></script>
+  <script src="config/constants.js"></script>
+  <script src="services/uiService.js"></script>
+  <script src="services/authService.js"></script>
+  <script src="services/adminService.js"></script>
+  <script src="services/parcelService.js"></script>
+
+  <script>
+    // Guard: admins only
+    authService.subscribe((event, user) => {
+      if (event === 'auth-change') {
+        if (!user || user.role !== CONSTANTS.USER_ROLES.ADMIN) {
+          window.location.href = 'pages/login.html';
+        }
+      }
+    });
+
+    // Tabs
+    document.querySelectorAll('.nav-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+        if (btn.dataset.tab === 'users') loadUsers();
+        if (btn.dataset.tab === 'drivers') loadDrivers();
+        if (btn.dataset.tab === 'shipments') loadShipments();
+        if (btn.dataset.tab === 'logs') loadLogs();
+        if (btn.dataset.tab === 'parcels') { loadRecentParcels(); }
+      });
+    });
+
+    // Stats
+    async function loadStats(){
+      const r = await adminService.getSystemStats();
+      if(r.success){
+        const s=r.stats;
+        document.getElementById('statUsers').textContent=s.totalUsers;
+        document.getElementById('statShipments').textContent=s.totalShipments;
+        document.getElementById('statDrivers').textContent=s.totalDrivers;
+        document.getElementById('statRevenue').textContent='$'+(s.totalRevenue||0).toLocaleString();
+      }
+    }
+
+    // Users
+    async function loadUsers(){
+      const role=document.getElementById('userRoleFilter').value;
+      const isActive=document.getElementById('userStatusFilter').value;
+      const filters={};
+      if(role) filters.role=role;
+      if(isActive!=='') filters.isActive=isActive==='true';
+      const users=await adminService.getAllUsers(filters);
+      const tbody=document.getElementById('usersTable');
+      tbody.innerHTML='';
+      if(!users.length){tbody.innerHTML='<tr><td colspan="6" class="muted">No users</td></tr>';return;}
+      users.forEach(u=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${u.email}</td><td>${u.fullName||'N/A'}</td><td>${u.role||'customer'}</td><td>${u.isActive?'<span class="muted">Active</span>':'<span class="muted">Inactive</span>'}</td><td>${new Date(u.createdAt).toLocaleDateString()}</td><td>${u.isActive?`<button class=btn-sm onclick=deactivateUser('${u.id}')>Deactivate</button>`:''}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    async function deactivateUser(id){
+      if(!confirm('Deactivate this user?')) return;
+      const r=await adminService.deactivateUser(id);
+      if(r.success){ uiService.showToast('User deactivated'); loadUsers(); }
+      else { uiService.showToast('Failed', 'error'); }
+    }
+
+    // Drivers
+    async function loadDrivers(){
+      const status=document.getElementById('driverStatusFilter').value;
+      const verified=document.getElementById('driverVerifiedFilter').value;
+      const filters={};
+      if(status) filters.status=status;
+      if(verified!=='') filters.verified=verified==='true';
+      const drivers=await adminService.getAllDrivers(filters);
+      const tbody=document.getElementById('driversTable');
+      tbody.innerHTML='';
+      if(!drivers.length){tbody.innerHTML='<tr><td colspan="7" class="muted">No drivers</td></tr>';return;}
+      drivers.forEach(d=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${d.fullName||''}</td><td>${d.email||''}</td><td>${d.phone||''}</td><td>${d.status||''}</td><td>${(d.rating||0).toFixed(1)}</td><td>${d.verified?'Yes':'No'}</td><td>${!d.verified&&d.status==='pending'?`<button class=btn-sm onclick=verifyDriver('${d.id}')>Verify</button> <button class="btn-sm btn-danger" onclick=rejectDriverPrompt('${d.id}')>Reject</button>`:''}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    async function verifyDriver(id){
+      if(!confirm('Verify this driver?')) return;
+      const r=await adminService.verifyDriver(id);
+      if(r.success){ uiService.showToast('Driver verified'); loadDrivers(); }
+      else { uiService.showToast('Failed', 'error'); }
+    }
+    async function rejectDriverPrompt(id){
+      const reason=prompt('Rejection reason?');
+      if(!reason) return;
+      const r=await adminService.rejectDriver(id, reason);
+      if(r.success){ uiService.showToast('Driver rejected'); loadDrivers(); }
+      else { uiService.showToast('Failed', 'error'); }
+    }
+
+    // Shipments
+    async function loadShipments(){
+      const status=document.getElementById('shipmentStatusFilter').value;
+      const type=document.getElementById('shipmentTypeFilter').value;
+      const filters={};
+      if(status) filters.status=status;
+      if(type) filters.shippingType=type;
+      const rows=await adminService.getAllShipments(filters);
+      const tbody=document.getElementById('shipmentsTable');
+      tbody.innerHTML='';
+      if(!rows.length){tbody.innerHTML='<tr><td colspan="7" class="muted">No shipments</td></tr>';return;}
+      rows.forEach(s=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${s.trackingNumber||s.id||''}</td><td>${s.status||''}</td><td>${s.originCity||''}, ${s.originState||''}</td><td>${s.destCity||''}, ${s.destState||''}</td><td>$${(s.totalCost||0).toFixed(2)}</td><td>${new Date(s.createdAt).toLocaleDateString()}</td><td><button class=btn-sm onclick="alert('Implement view details')">View</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Settings
+    document.getElementById('settingsForm').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const settings={
+        commissionRate: parseFloat(document.getElementById('commissionRate').value),
+        taxRate: parseFloat(document.getElementById('taxRate').value),
+        minOrderValue: parseFloat(document.getElementById('minOrderValue').value),
+        maxWeight: parseFloat(document.getElementById('maxWeight').value)
+      };
+      const r=await adminService.updateSystemSettings(settings);
+      if(r.success) uiService.showToast('Settings updated');
+      else uiService.showToast('Failed to update settings','error');
+    });
+
+    // Parcels quick create
+    document.getElementById('parcelForm').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const data={
+        origin:{ name: document.getElementById('originName').value, coords:[parseFloat(document.getElementById('originLat').value), parseFloat(document.getElementById('originLng').value)] },
+        destination:{ name: document.getElementById('destName').value, coords:[parseFloat(document.getElementById('destLat').value), parseFloat(document.getElementById('destLng').value)] },
+        durationMinutes: parseInt(document.getElementById('durationMinutes').value)
+      };
+      try{
+        const id=await window.parcelService.createParcel(data);
+        document.getElementById('parcelMsg').textContent=`Created parcel ${id}`;
+        await adminService.logAdminAction('create_parcel', {type:'parcel', id});
+        loadRecentParcels();
+      }catch(err){
+        document.getElementById('parcelMsg').textContent='Error: '+(err.message||err);
+      }
+    });
+
+    async function loadRecentParcels(){
+      const tbody=document.getElementById('parcelsTable');
+      try{
+        const parcels=await window.parcelService.getRecentParcels(10);
+        if(!parcels.length){tbody.innerHTML='<tr><td colspan="5" class="muted">No parcels</td></tr>';return;}
+        tbody.innerHTML=parcels.map(p=>{
+          return `<tr>
+            <td class="mono">${p.id}</td>
+            <td>${p.origin?.name||''} → ${p.destination?.name||''}</td>
+            <td>${Math.round(p.progressPercent||0)}%</td>
+            <td>${p.currentStatus||''}</td>
+            <td><a class="btn-sm" href="pages/parcel-tracking.html?id=${p.id}">Track</a></td>
+          </tr>`
+        }).join('');
+      }catch(e){
+        tbody.innerHTML='<tr><td colspan="5" class="muted">Error loading</td></tr>';
+      }
+    }
+
+    // Logs
+    async function loadLogs(){
+      const action=document.getElementById('logActionFilter').value.trim();
+      const adminId=document.getElementById('logAdminIdFilter').value.trim();
+      const logs=await adminService.getAdminLogs({ limit: 100, action: action||undefined, adminId: adminId||undefined });
+      const tbody=document.getElementById('logsTable');
+      tbody.innerHTML='';
+      if(!logs.length){tbody.innerHTML='<tr><td colspan="5" class="muted">No logs</td></tr>';return;}
+      logs.forEach(l=>{
+        const tr=document.createElement('tr');
+        const when = l.createdAt?.toDate ? l.createdAt.toDate() : new Date(l.createdAt);
+        tr.innerHTML=`<td>${when.toLocaleString()}</td><td>${l.adminEmail||l.adminId||'-'}</td><td class="mono">${l.action}</td><td>${l.targetType||''}${l.targetId?`:${l.targetId}`:''}</td><td><span class="muted">${JSON.stringify(l.meta||{})}</span></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async ()=>{ await authService.logout(); window.location.href='/'; });
+
+    // Init
+    loadStats();
+    loadUsers();
+  </script>
+</body>
+</html>

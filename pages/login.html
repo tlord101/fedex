@@ -67,7 +67,7 @@
         authService.subscribe(async (event, userProfile) => {
             if (event === 'auth-change' && userProfile) {
                 if (userProfile.role === CONSTANTS.USER_ROLES.ADMIN) {
-                    window.location.href = 'admin-dashboard.html';
+                    window.location.href = '/admin';
                 } else {
                     await authService.signOut();
                     uiService.showToast('Access restricted to administrators only.', 'error');
@@ -90,7 +90,7 @@
                 uiService.hideLoading();
                 if (profile && profile.role === CONSTANTS.USER_ROLES.ADMIN) {
                     uiService.showToast('Welcome, admin. Redirecting...', 'success');
-                    setTimeout(() => { window.location.href = 'admin-dashboard.html'; }, 800);
+                    setTimeout(() => { window.location.href = '/admin'; }, 800);
                 } else {
                     await authService.signOut();
                     uiService.showToast('Access denied. Admins only.', 'error');
