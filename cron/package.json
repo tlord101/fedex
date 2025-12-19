@@ -1,0 +1,30 @@
+{
+  "name": "fedex-parcel-tracking-cron",
+  "version": "1.0.0",
+  "description": "Cron job for updating parcel tracking progress in Firestore",
+  "main": "cron/parcel-progress-cron.js",
+  "scripts": {
+    "start": "node cron/parcel-progress-cron.js",
+    "dev": "nodemon cron/parcel-progress-cron.js",
+    "test": "node cron/parcel-progress-cron.js --test"
+  },
+  "keywords": [
+    "parcel",
+    "tracking",
+    "cron",
+    "firebase",
+    "firestore"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "firebase-admin": "^11.11.1",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

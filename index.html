@@ -22,14 +22,11 @@
             </div>
             <ul class="nav-links">
                 <li><a href="#home">Home</a></li>
-                <li><a href="#tracking">Track</a></li>
-                <li><a href="#shipping">Shipping</a></li>
-                <li><a href="#rates">Rates</a></li>
+                <li><a href="pages/tracking.html">Track</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
             <div class="nav-buttons">
-                <a href="pages/login.html" class="btn btn-outline btn-small">Login</a>
-                <a href="pages/signup.html" class="btn btn-primary btn-small">Sign Up</a>
+                <a href="pages/tracking.html" class="btn btn-primary btn-small">Track Package</a>
             </div>
         </nav>
     </header>
@@ -41,8 +38,7 @@
                 <h1>Ship Smarter, Deliver Faster</h1>
                 <p>Your trusted partner for reliable shipping and logistics services worldwide</p>
                 <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                    <a href="pages/ship.html" class="btn btn-secondary">Ship Now</a>
-                    <a href="#tracking" class="btn btn-outline" style="color: white; border-color: white;">Track Package</a>
+                    <a href="pages/tracking.html" class="btn btn-secondary">Track Package</a>
                 </div>
             </div>
         </section>
@@ -106,104 +102,17 @@
             </div>
         </section>
 
-        <!-- Shipping Types Section -->
-        <section style="padding: 4rem 0;" id="shipping">
-            <div class="container">
-                <h2 style="text-align: center; margin-bottom: 3rem;">Our Shipping Options</h2>
-                <div class="grid grid-2">
-                    <div class="card">
-                        <h3>Standard Shipping</h3>
-                        <p>Affordable and reliable for non-urgent packages</p>
-                        <div style="color: var(--primary-color); font-size: 1.5rem; font-weight: bold; margin: 1rem 0;">
-                            From $5.99
-                        </div>
-                        <p style="color: var(--text-light); font-size: 0.9rem;">Estimated delivery: 5 business days</p>
-                        <button class="btn btn-primary" onclick="navigateTo('pages/ship.html?type=standard')">Choose</button>
-                    </div>
+        <!-- Shipping options hidden for public users -->
 
-                    <div class="card">
-                        <h3>Express Shipping</h3>
-                        <p>Fast delivery for important packages</p>
-                        <div style="color: var(--primary-color); font-size: 1.5rem; font-weight: bold; margin: 1rem 0;">
-                            From $12.99
-                        </div>
-                        <p style="color: var(--text-light); font-size: 0.9rem;">Estimated delivery: 3 business days</p>
-                        <button class="btn btn-primary" onclick="navigateTo('pages/ship.html?type=express')">Choose</button>
-                    </div>
-
-                    <div class="card">
-                        <h3>Overnight Shipping</h3>
-                        <p>Premium service for urgent deliveries</p>
-                        <div style="color: var(--primary-color); font-size: 1.5rem; font-weight: bold; margin: 1rem 0;">
-                            From $24.99
-                        </div>
-                        <p style="color: var(--text-light); font-size: 0.9rem;">Guaranteed next business day</p>
-                        <button class="btn btn-primary" onclick="navigateTo('pages/ship.html?type=overnight')">Choose</button>
-                    </div>
-
-                    <div class="card">
-                        <h3>International Shipping</h3>
-                        <p>Reliable worldwide delivery services</p>
-                        <div style="color: var(--primary-color); font-size: 1.5rem; font-weight: bold; margin: 1rem 0;">
-                            From $35.00
-                        </div>
-                        <p style="color: var(--text-light); font-size: 0.9rem;">Estimated delivery: 10+ business days</p>
-                        <button class="btn btn-primary" onclick="navigateTo('pages/ship.html?type=international')">Choose</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Rates Section -->
-        <section style="padding: 4rem 0; background-color: white;" id="rates">
-            <div class="container">
-                <h2 style="text-align: center; margin-bottom: 3rem;">Calculate Your Shipping Rate</h2>
-                <div class="card" style="max-width: 600px; margin: 0 auto;">
-                    <form id="rate-calculator">
-                        <div class="form-group">
-                            <label for="rate-weight">Package Weight (lbs)</label>
-                            <input type="number" id="rate-weight" name="weight" min="0.1" step="0.1" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="rate-type">Shipping Type</label>
-                            <select id="rate-type" name="type" required>
-                                <option value="">Select shipping type</option>
-                                <option value="standard">Standard (5 days) - $5.99 base</option>
-                                <option value="express">Express (3 days) - $12.99 base</option>
-                                <option value="overnight">Overnight - $24.99 base</option>
-                                <option value="international">International - $35.00 base</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="rate-distance">Approximate Distance (miles)</label>
-                            <input type="number" id="rate-distance" name="distance" min="0">
-                        </div>
-
-                        <div class="form-group">
-                            <label>
-                                <input type="checkbox" id="rate-international" name="isInternational">
-                                International Delivery
-                            </label>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">Calculate Rate</button>
-                    </form>
-                    <div id="rate-result" style="margin-top: 2rem;"></div>
-                </div>
-            </div>
-        </section>
+        <!-- Rates Section hidden for public users -->
 
         <!-- CTA Section -->
         <section style="padding: 4rem 0; background: linear-gradient(135deg, var(--primary-color) 0%, #6b2dbf 100%); color: white; text-align: center;">
             <div class="container">
                 <h2>Ready to Get Started?</h2>
-                <p style="color: rgba(255,255,255,0.9); font-size: 1.1rem; margin: 1rem 0;">
-                    Join thousands of satisfied customers shipping with us today
-                </p>
+                <p style="color: rgba(255,255,255,0.9); font-size: 1.1rem; margin: 1rem 0;">Track your shipment instantly.</p>
                 <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                    <a href="pages/signup.html" class="btn btn-secondary">Create Account</a>
+                    <a href="pages/tracking.html" class="btn btn-secondary">Track Now</a>
                     <a href="#contact" class="btn btn-outline" style="color: white; border-color: white;">Contact Us</a>
                 </div>
             </div>
@@ -277,7 +186,7 @@
     <script src="config/constants.js"></script>
     <script src="services/authService.js"></script>
     <script src="services/shipmentService.js"></script>
-    <script src="services/rateService.js"></script>
+    <!-- rateService not needed for tracking-only public site -->
     <script src="services/uiService.js"></script>
 
     <!-- Page Scripts -->
@@ -316,45 +225,7 @@
             }
         });
 
-        // Rate calculator
-        document.getElementById('rate-calculator').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const weight = parseFloat(document.getElementById('rate-weight').value);
-            const type = document.getElementById('rate-type').value;
-            const distance = parseFloat(document.getElementById('rate-distance').value) || 0;
-            const isInternational = document.getElementById('rate-international').checked;
-
-            if (!weight || !type) {
-                uiService.showToast('Please fill in all required fields', 'error');
-                return;
-            }
-
-            const rateInfo = rateService.calculateRate(type, weight, distance, isInternational);
-            const resultDiv = document.getElementById('rate-result');
-            
-            resultDiv.innerHTML = `
-                <div style="background-color: var(--light-bg); padding: 1.5rem; border-radius: 8px;">
-                    <h3 style="color: var(--primary-color);">Estimated Cost</h3>
-                    <div style="margin: 1rem 0;">
-                        <p><strong>Base Rate:</strong> ${uiService.formatCurrency(rateInfo.baseRate)}</p>
-                        <p><strong>Weight Charge:</strong> ${uiService.formatCurrency(rateInfo.weightCharge)}</p>
-                        ${rateInfo.surcharges > 0 ? `<p><strong>Surcharges:</strong> ${uiService.formatCurrency(rateInfo.surcharges)}</p>` : ''}
-                        <p style="border-top: 2px solid var(--border-color); padding-top: 1rem; font-size: 1.2rem;">
-                            <strong>Total: ${uiService.formatCurrency(rateInfo.totalCost)}</strong>
-                        </p>
-                        <p style="color: var(--text-light); margin-top: 0.5rem;">
-                            Estimated delivery: ${uiService.formatDate(rateInfo.estimatedDelivery)}
-                        </p>
-                    </div>
-                    <button onclick="navigateTo('pages/ship.html?type=${type}&weight=${weight}')" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Proceed to Shipping</button>
-                </div>
-            `;
-        });
-
-        // Navigation helper
-        function navigateTo(url) {
-            window.location.href = url;
-        }
+        // Rates and shipping features disabled for public users
     </script>
 </body>
 </html>

@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parcel Cron Simulator - Browser Version</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Firebase v9 Compat -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <style>
+        .log-entry {
+            padding: 8px 12px;
+            margin-bottom: 4px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        .log-info { background-color: #e0f2fe; color: #075985; }
+        .log-success { background-color: #dcfce7; color: #166534; }
+        .log-warning { background-color: #fef3c7; color: #854d0e; }
+        .log-error { background-color: #fee2e2; color: #991b1b; }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-running { background-color: #10b981; animation: pulse 2s infinite; }
+        .status-stopped { background-color: #ef4444; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">⚙️ Parcel Progress Cron Simulator</h1>
+            <p class="text-gray-600">Browser-based cron job for updating parcel progress in real-time</p>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-800 mb-2">Status</h2>
+                    <div class="flex items-center">
+                        <span class="status-indicator" id="statusIndicator"></span>
+                        <span class="text-lg font-medium" id="statusText">Stopped</span>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col gap-2">
+                    <div class="flex gap-2">
+                        <button id="startBtn" 
+                                class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg transition">
+                            ▶️ Start Cron
+                        </button>
+                        <button id="stopBtn" disabled
+                                class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed">
+                            ⏸️ Stop Cron
+                        </button>
+                        <button id="runOnceBtn"
+                                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition">
+                            🔄 Run Once
+                        </button>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        <label class="inline-flex items-center">
+                            <span class="mr-2">Interval:</span>
+                            <select id="intervalSelect" class="border border-gray-300 rounded px-2 py-1">
+                                <option value="10000">10 seconds (demo)</option>
+                                <option value="30000">30 seconds (demo)</option>
+                                <option value="60000" selected>1 minute (production)</option>
+                                <option value="300000">5 minutes</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6 pt-6 border-t border-gray-200">
+                <div>
+                    <p class="text-sm text-gray-600">Total Runs</p>
+                    <p class="text-2xl font-bold text-gray-800" id="totalRuns">0</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Active Parcels</p>
+                    <p class="text-2xl font-bold text-blue-600" id="activeParcels">0</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Updated</p>
+                    <p class="text-2xl font-bold text-green-600" id="updatedParcels">0</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Errors</p>
+                    <p class="text-2xl font-bold text-red-600" id="errorCount">0</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Last Run</p>
+                    <p class="text-sm font-medium text-gray-800" id="lastRun">Never</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Log -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-gray-800">📋 Activity Log</h2>
+                <button id="clearLogBtn" class="text-sm text-gray-600 hover:text-gray-800">
+                    🗑️ Clear Log
+                </button>
+            </div>
+            <div id="logContainer" class="max-h-96 overflow-y-auto bg-gray-50 rounded-lg p-4">
+                <div class="log-entry log-info">
+                    ℹ️ Cron simulator ready. Click "Start Cron" to begin automatic updates.
+                </div>
+            </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-6">
+            <h3 class="text-lg font-semibold text-blue-900 mb-3">📖 How It Works</h3>
+            <ul class="space-y-2 text-sm text-blue-800">
+                <li>✅ This simulator runs in your browser and updates Firestore parcels at regular intervals</li>
+                <li>✅ It calculates progress based on elapsed time vs. total duration</li>
+                <li>✅ Status updates automatically: Picked Up → In Transit → Out for Delivery → Delivered</li>
+                <li>✅ Only writes to Firestore when progress actually changes (saves costs)</li>
+                <li>⚠️ Keep this tab open for the cron to work (or deploy server-side version)</li>
+                <li>🚀 For production, deploy the Node.js cron or Firebase Scheduled Function</li>
+            </ul>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+            <a href="parcel-admin.html" 
+               class="block bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition text-center">
+                <div class="text-3xl mb-2">📦</div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-1">Admin Panel</h3>
+                <p class="text-sm text-gray-600">Create and manage parcels</p>
+            </a>
+            <a href="parcel-tracking.html" 
+               class="block bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition text-center">
+                <div class="text-3xl mb-2">🗺️</div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-1">Track Parcel</h3>
+                <p class="text-sm text-gray-600">View live tracking</p>
+            </a>
+        </div>
+    </div>
+
+    <script src="../config/firebase.js"></script>
+    <script>
+        let cronInterval = null;
+        let isRunning = false;
+        let stats = {
+            totalRuns: 0,
+            activeParcels: 0,
+            updatedParcels: 0,
+            errorCount: 0,
+            lastRun: null
+        };
+
+        // DOM Elements
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const runOnceBtn = document.getElementById('runOnceBtn');
+        const clearLogBtn = document.getElementById('clearLogBtn');
+        const intervalSelect = document.getElementById('intervalSelect');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusText = document.getElementById('statusText');
+        const logContainer = document.getElementById('logContainer');
+
+        // Logging functions
+        function log(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const emoji = {
+                info: 'ℹ️',
+                success: '✅',
+                warning: '⚠️',
+                error: '❌'
+            }[type] || 'ℹ️';
+            
+            entry.textContent = `[${timestamp}] ${emoji} ${message}`;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            
+            // Keep only last 100 entries
+            while (logContainer.children.length > 100) {
+                logContainer.removeChild(logContainer.firstChild);
+            }
+        }
+
+        // Update stats display
+        function updateStatsDisplay() {
+            document.getElementById('totalRuns').textContent = stats.totalRuns;
+            document.getElementById('activeParcels').textContent = stats.activeParcels;
+            document.getElementById('updatedParcels').textContent = stats.updatedParcels;
+            document.getElementById('errorCount').textContent = stats.errorCount;
+            document.getElementById('lastRun').textContent = stats.lastRun 
+                ? new Date(stats.lastRun).toLocaleTimeString() 
+                : 'Never';
+        }
+
+        // Calculate progress
+        function calculateProgress(startTime, endTime) {
+            const now = Date.now();
+            if (now < startTime) return 0;
+            if (now >= endTime) return 100;
+            
+            const totalDuration = endTime - startTime;
+            const elapsed = now - startTime;
+            const progress = (elapsed / totalDuration) * 100;
+            
+            return Math.min(100, Math.max(0, Math.round(progress * 100) / 100));
+        }
+
+        // Get status from progress
+        function getStatusFromProgress(progressPercent) {
+            if (progressPercent >= 100) return 'Delivered';
+            if (progressPercent >= 75) return 'Out for Delivery';
+            if (progressPercent >= 25) return 'In Transit';
+            return 'Picked Up';
+        }
+
+        // Update single parcel
+        async function updateParcel(parcelId, parcelData) {
+            try {
+                const currentProgress = calculateProgress(parcelData.startTime, parcelData.endTime);
+                const currentStatus = getStatusFromProgress(currentProgress);
+                
+                // Only update if progress has changed significantly
+                if (Math.abs(currentProgress - parcelData.progressPercent) < 0.1 && 
+                    currentStatus === parcelData.currentStatus) {
+                    return { updated: false, parcelId };
+                }
+                
+                // Update Firestore
+                await window.firebaseApp.db.collection('parcels').doc(parcelId).update({
+                    progressPercent: currentProgress,
+                    currentStatus: currentStatus,
+                    lastUpdated: Date.now()
+                });
+                
+                log(`Updated parcel ${parcelId.substring(0, 8)}... → ${currentProgress.toFixed(1)}% (${currentStatus})`, 'success');
+                return { updated: true, parcelId, progress: currentProgress, status: currentStatus };
+            } catch (error) {
+                log(`Error updating parcel ${parcelId.substring(0, 8)}...: ${error.message}`, 'error');
+                return { updated: false, parcelId, error: error.message };
+            }
+        }
+
+        // Main cron job function
+        async function runCronJob() {
+            log('Starting parcel progress update job...', 'info');
+            const startTime = Date.now();
+            
+            try {
+                // Get all active parcels (not yet delivered)
+                const snapshot = await window.firebaseApp.db.collection('parcels')
+                    .where('progressPercent', '<', 100)
+                    .get();
+                
+                stats.activeParcels = snapshot.size;
+                
+                if (snapshot.empty) {
+                    log('No active parcels to update', 'warning');
+                    stats.totalRuns++;
+                    stats.lastRun = Date.now();
+                    updateStatsDisplay();
+                    return;
+                }
+                
+                log(`Found ${snapshot.size} active parcel(s) to update`, 'info');
+                
+                // Update each parcel
+                const updatePromises = [];
+                snapshot.forEach(doc => {
+                    updatePromises.push(updateParcel(doc.id, doc.data()));
+                });
+                
+                const results = await Promise.all(updatePromises);
+                
+                // Summary
+                const updatedCount = results.filter(r => r.updated).length;
+                const errorCountInRun = results.filter(r => r.error).length;
+                const duration = Date.now() - startTime;
+                
+                stats.totalRuns++;
+                stats.updatedParcels += updatedCount;
+                stats.errorCount += errorCountInRun;
+                stats.lastRun = Date.now();
+                
+                log(`Job completed in ${duration}ms - Updated: ${updatedCount}, Skipped: ${results.length - updatedCount - errorCountInRun}`, 'success');
+                updateStatsDisplay();
+                
+            } catch (error) {
+                log(`Cron job failed: ${error.message}`, 'error');
+                stats.errorCount++;
+                stats.totalRuns++;
+                stats.lastRun = Date.now();
+                updateStatsDisplay();
+            }
+        }
+
+        // Start cron
+        function startCron() {
+            if (isRunning) return;
+            
+            const interval = parseInt(intervalSelect.value);
+            isRunning = true;
+            
+            statusIndicator.className = 'status-indicator status-running';
+            statusText.textContent = 'Running';
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            intervalSelect.disabled = true;
+            
+            log(`Cron started - interval: ${interval / 1000}s`, 'success');
+            
+            // Run immediately
+            runCronJob();
+            
+            // Then run at interval
+            cronInterval = setInterval(runCronJob, interval);
+        }
+
+        // Stop cron
+        function stopCron() {
+            if (!isRunning) return;
+            
+            isRunning = false;
+            
+            if (cronInterval) {
+                clearInterval(cronInterval);
+                cronInterval = null;
+            }
+            
+            statusIndicator.className = 'status-indicator status-stopped';
+            statusText.textContent = 'Stopped';
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            intervalSelect.disabled = false;
+            
+            log('Cron stopped', 'warning');
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', startCron);
+        stopBtn.addEventListener('click', stopCron);
+        runOnceBtn.addEventListener('click', runCronJob);
+        clearLogBtn.addEventListener('click', () => {
+            logContainer.innerHTML = '<div class="log-entry log-info">ℹ️ Log cleared</div>';
+        });
+
+        // Initialize status
+        statusIndicator.className = 'status-indicator status-stopped';
+        updateStatsDisplay();
+
+        // Warn before closing if cron is running
+        window.addEventListener('beforeunload', (e) => {
+            if (isRunning) {
+                e.preventDefault();
+                e.returnValue = 'Cron job is running. Are you sure you want to leave?';
+            }
+        });
+
+        // Auto-start if URL param present
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('autostart') === 'true') {
+            setTimeout(() => {
+                log('Auto-starting cron from URL parameter...', 'info');
+                startCron();
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

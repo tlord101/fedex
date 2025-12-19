@@ -18,7 +18,6 @@
             <div class="logo">📦 FedEx Clone</div>
             <div class="nav-buttons">
                 <a href="../index.html" class="btn btn-outline btn-small">Back to Home</a>
-                <a href="dashboard.html" class="btn btn-primary btn-small">Dashboard</a>
             </div>
         </nav>
     </header>
@@ -298,6 +297,16 @@
 
             summaryContent.innerHTML = html;
         }
+
+        // Admin-only access guard
+        authService.subscribe((event, userProfile) => {
+            if (event === 'auth-change') {
+                if (!userProfile || userProfile.role !== CONSTANTS.USER_ROLES.ADMIN) {
+                    uiService.showToast('Access denied. Admins only.', 'error');
+                    setTimeout(() => { window.location.href = 'tracking.html'; }, 600);
+                }
+            }
+        });
 
         // Form submission
         form.addEventListener('submit', async (e) => {
