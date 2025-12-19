@@ -8,6 +8,7 @@
     "serve": "npx http-server",
     "deploy:firebase": "firebase deploy",
     "deploy:netlify": "netlify deploy --prod",
+    "seed:admin": "node tools/seedAdmin.js",
     "test": "echo \"Add tests here\"",
     "lint": "echo \"Add linting here\""
   },
@@ -29,6 +30,9 @@
     "firebase-tools": "^12.0.0",
     "http-server": "^14.1.1",
     "netlify-cli": "^16.0.0"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.6.0"
   },
   "engines": {
     "node": ">=14.0.0"
